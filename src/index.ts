@@ -13,7 +13,7 @@ export async function sign(jsonTx:any, seed:string, sequence:string, account_num
         let path = makeCosmoshubPath(0)
         // const myRegistry = new Registry(defaultStargateTypes);
         const wallet = await DirectSecp256k1HdWallet.fromMnemonic(seed,{hdPaths: [path],prefix});
-        const clientOffline = await SigningStargateClient.offline(wallet,{registry:myRegistry});
+        const clientOffline = await SigningStargateClient.offline(wallet);
         const [account] = await wallet.getAccounts();
 
         // myRegistry.register("/gamm.swap-exact-amount-in", osmosis.v1beta1.MsgSwapExactAmountIn);
