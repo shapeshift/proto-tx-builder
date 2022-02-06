@@ -5,8 +5,8 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "test": "jest --verbose --silent=true",
-    "test-debug": "jest --verbose",
+    "test": "npm run build && jest --verbose --silent=true",
+    "test-debug": "npm run build && jest --verbose",
     "coverage": "jest --coverage",
     "build": "tsc -p .",
     "prepublish": "npm run build"

@@ -209,10 +209,13 @@ const parse_legacy_tx_format = function(jsonTx:any){
                     sender:jsonTx.msg[0].value.sender,
                     sourceChannel:jsonTx.msg[0].value.source_channel,
                     sourcePort:jsonTx.msg[0].value.source_port,
-                    token:jsonTx.msg[0].value.source_port,
-                    timeoutHeight:jsonTx.msg[0].value.timeout_height.revision_height,
-                    timeoutTimestamp:jsonTx.msg[0].value.source_port,
+                    token:coins(parseInt(jsonTx.msg[0].value.token.amount), jsonTx.msg[0].value.token.denom)[0],
+                    timeoutHeight:{
+                        revisionHeight: jsonTx.msg[0].value.timeout_height.revision_height,
+                        revisionNumber: jsonTx.msg[0].value.timeout_height.revision_number,
+                    }
                 };
+                from = jsonTx.msg[0].value.sender
                 msg = {
                     typeUrl: "/ibc.applications.transfer.v1.MsgTransfer",
                     value: msgTransfer,
