@@ -11,8 +11,8 @@ const fs = require("fs");
 const log = require("@pioneer-platform/loggerdog")()
 
 const supported_assets = [
-    'cosmos',
-    // 'osmosis',
+    // 'cosmos',
+    'osmosis',
     // 'thorchain',
     // 'terra',
     // 'kava',
@@ -35,68 +35,98 @@ describe('signs Tendermint transactions', async function() {
         console.log("ASSET: ",asset)
 
         //Osmosis only
-        // if(asset === 'osmosis'){
-        //     it('signs a mainnet '+asset+' reference swap transaction', async function() {
-        //         //get reference data
-        //         let referenceTx = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.swap.json');
-        //         referenceTx = JSON.parse(referenceTx.toString())
-        //
-        //         let referenceTxSigned = fs.readFileSync('./src/reference-data/staking/tx01.mainnet.'+asset+'.swap.signed.json');
-        //         referenceTxSigned = JSON.parse(referenceTxSigned.toString())
-        //
-        //         // log.info(tag,"referenceTx: ",referenceTx)
-        //         // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
-        //         expect(referenceTx).toBeTruthy();
-        //         expect(referenceTxSigned).toBeTruthy();
-        //
-        //         const network = getNetwork(asset);
-        //         const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
-        //
-        //         const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
-        //         log.info(tag,"masterPath: ",masterPath)
-        //         // const keyPair = util.getKeyPair(wallet, masterPath, asset);
-        //         // log.info(tag,"keyPair: ",keyPair)
-        //         // @ts-ignore
-        //         let prefix = prefixs[asset]
-        //         const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
-        //         log.info(tag,"result: ",result)
-        //
-        //
-        //         expect(result.serialized).toBe(referenceTxSigned.serialized);
-        //         expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
-        //     });
-        // }
+        if(asset === 'osmosis'){
+            it('signs a mainnet '+asset+' reference lp add transaction', async function() {
+                //get reference data
+                let referenceTx = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.lp-add.json');
+                referenceTx = JSON.parse(referenceTx.toString())
+
+                let referenceTxSigned = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.lp-add.signed.json');
+                referenceTxSigned = JSON.parse(referenceTxSigned.toString())
+
+                // log.info(tag,"referenceTx: ",referenceTx)
+                // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
+                expect(referenceTx).toBeTruthy();
+                expect(referenceTxSigned).toBeTruthy();
+
+                const network = getNetwork(asset);
+                const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
+
+                const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
+                log.info(tag,"masterPath: ",masterPath)
+                // const keyPair = util.getKeyPair(wallet, masterPath, asset);
+                // log.info(tag,"keyPair: ",keyPair)
+                // @ts-ignore
+                let prefix = prefixs[asset]
+                const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
+                log.info(tag,"result: ",result)
+
+
+                expect(result.serialized).toBe(referenceTxSigned.serialized);
+                expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
+            });
+
+            // it('signs a mainnet '+asset+' reference swap transaction', async function() {
+            //     //get reference data
+            //     let referenceTx = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.swap.json');
+            //     referenceTx = JSON.parse(referenceTx.toString())
+            //
+            //     let referenceTxSigned = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.swap.signed.json');
+            //     referenceTxSigned = JSON.parse(referenceTxSigned.toString())
+            //
+            //     // log.info(tag,"referenceTx: ",referenceTx)
+            //     // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
+            //     expect(referenceTx).toBeTruthy();
+            //     expect(referenceTxSigned).toBeTruthy();
+            //
+            //     const network = getNetwork(asset);
+            //     const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
+            //
+            //     const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
+            //     log.info(tag,"masterPath: ",masterPath)
+            //     // const keyPair = util.getKeyPair(wallet, masterPath, asset);
+            //     // log.info(tag,"keyPair: ",keyPair)
+            //     // @ts-ignore
+            //     let prefix = prefixs[asset]
+            //     const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
+            //     log.info(tag,"result: ",result)
+            //
+            //
+            //     expect(result.serialized).toBe(referenceTxSigned.serialized);
+            //     expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
+            // });
+        }
 
         //IBC
-        it('signs a mainnet '+asset+' reference IBC transfer transaction', async function() {
-            //get reference data
-            let referenceTx = fs.readFileSync('./src/reference-data/ibc/tx01.mainnet.'+asset+'.ibc.transfer.json');
-            referenceTx = JSON.parse(referenceTx.toString())
-
-            let referenceTxSigned = fs.readFileSync('./src/reference-data/ibc/tx01.mainnet.'+asset+'.ibc.transfer.signed.json');
-            referenceTxSigned = JSON.parse(referenceTxSigned.toString())
-
-            // log.info(tag,"referenceTx: ",referenceTx)
-            // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
-            expect(referenceTx).toBeTruthy();
-            expect(referenceTxSigned).toBeTruthy();
-
-            const network = getNetwork(asset);
-            const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
-
-            const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
-            log.info(tag,"masterPath: ",masterPath)
-            // const keyPair = util.getKeyPair(wallet, masterPath, asset);
-            // log.info(tag,"keyPair: ",keyPair)
-            // @ts-ignore
-            let prefix = prefixs[asset]
-            const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
-            log.info(tag,"result: ",result)
-
-
-            expect(result.serialized).toBe(referenceTxSigned.serialized);
-            expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
-        });
+        // it('signs a mainnet '+asset+' reference IBC transfer transaction', async function() {
+        //     //get reference data
+        //     let referenceTx = fs.readFileSync('./src/reference-data/ibc/tx01.mainnet.'+asset+'.ibc.transfer.json');
+        //     referenceTx = JSON.parse(referenceTx.toString())
+        //
+        //     let referenceTxSigned = fs.readFileSync('./src/reference-data/ibc/tx01.mainnet.'+asset+'.ibc.transfer.signed.json');
+        //     referenceTxSigned = JSON.parse(referenceTxSigned.toString())
+        //
+        //     // log.info(tag,"referenceTx: ",referenceTx)
+        //     // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
+        //     expect(referenceTx).toBeTruthy();
+        //     expect(referenceTxSigned).toBeTruthy();
+        //
+        //     const network = getNetwork(asset);
+        //     const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
+        //
+        //     const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
+        //     log.info(tag,"masterPath: ",masterPath)
+        //     // const keyPair = util.getKeyPair(wallet, masterPath, asset);
+        //     // log.info(tag,"keyPair: ",keyPair)
+        //     // @ts-ignore
+        //     let prefix = prefixs[asset]
+        //     const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
+        //     log.info(tag,"result: ",result)
+        //
+        //
+        //     expect(result.serialized).toBe(referenceTxSigned.serialized);
+        //     expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
+        // });
 
         // it('signs a mainnet '+asset+' reference undelegate transaction', async function() {
         //     //get reference data

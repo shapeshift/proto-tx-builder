@@ -5,18 +5,33 @@ import { coins, Registry } from "@cosmjs/proto-signing";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { HdPath, Slip10RawIndex } from "@cosmjs/crypto";
 // import {osmosis} from "@pioneer-platform/osmosis-tx-codecs"
+// import * as Gamm from "./x/gamm";
+import * as codecs from "./generated";
 
 export async function sign(jsonTx:any, seed:string, sequence:string, account_number:string, chain_id:string, prefix:string) {
     let tag = " | sign | ";
     try {
         //TODO dont assume mnemonic
         let path = makeCosmoshubPath(0)
-        // const myRegistry = new Registry(defaultStargateTypes);
+        const myRegistry = new Registry(defaultStargateTypes);
+        //custom osmosis modules
+        myRegistry.register("/osmosis.gamm.v1beta1.MsgSwapExactAmountIn", codecs.osmosis.gamm.v1beta1.MsgSwapExactAmountIn);
+        myRegistry.register("/osmosis.gamm.v1beta1.MsgSwapExactAmountOut", codecs.osmosis.gamm.v1beta1.MsgSwapExactAmountOut);
+        myRegistry.register("/osmosis.gamm.v1beta1.MsgJoinPool", codecs.osmosis.gamm.v1beta1.MsgJoinPool);
+        myRegistry.register("/osmosis.gamm.v1beta1.MsgExitPool", codecs.osmosis.gamm.v1beta1.MsgExitPool);
+        myRegistry.register("/osmosis.gamm.v1beta1.MsgCreatePool", codecs.osmosis.gamm.v1beta1.MsgCreatePool);
+        myRegistry.register("/osmosis.gamm.v1beta1.PoolParams", codecs.osmosis.gamm.v1beta1.PoolParams);
+        myRegistry.register("/osmosis.gamm.v1beta1.PoolAsset", codecs.osmosis.gamm.v1beta1.PoolAsset);
+        myRegistry.register("/osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn", codecs.osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn);
+        myRegistry.register("/osmosis.gamm.v1beta1.MsgExitSwapExternAmountOut", codecs.osmosis.gamm.v1beta1.MsgExitSwapExternAmountOut);
+        myRegistry.register("/osmosis.gamm.v1beta1.SwapAmountInRoute", codecs.osmosis.gamm.v1beta1.SwapAmountInRoute);
+        myRegistry.register("/osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn", codecs.osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn);
+
         const wallet = await DirectSecp256k1HdWallet.fromMnemonic(seed,{hdPaths: [path],prefix});
-        const clientOffline = await SigningStargateClient.offline(wallet);
+        const clientOffline = await SigningStargateClient.offline(wallet,{ registry: myRegistry });
         const [account] = await wallet.getAccounts();
 
-        // myRegistry.register("/gamm.swap-exact-amount-in", osmosis.v1beta1.MsgSwapExactAmountIn);
+
 
         let {msg,from,fee,memo} = parse_legacy_tx_format(jsonTx)
         if(from !== account.address){
@@ -69,6 +84,7 @@ export async function sign(jsonTx:any, seed:string, sequence:string, account_num
         return output
     } catch (e) {
         console.error(tag, "e: ", e);
+        // @ts-ignore
         throw Error(e)
     }
 }
@@ -226,13 +242,52 @@ const parse_legacy_tx_format = function(jsonTx:any){
                 };
                 break;
             case 'osmosis/gamm/swap-exact-amount-in':
-                //TODO
+                if(!jsonTx.msg[0].value.sender) throw Error("Missing sender in msg[0]")
+                if(!jsonTx.msg[0].value.tokenIn) throw Error("Missing tokenIn in msg[0]")
+                if(!jsonTx.msg[0].value.tokenOutMinAmount) throw Error("Missing tokenOutMinAmount in msg[0]")
+                if(!jsonTx.msg[0].value.routes[0].poolId) throw Error("Missing poolId in msg[0] routes[0]")
+                if(!jsonTx.msg[0].value.routes[0].tokenOutDenom) throw Error("Missing tokenOutDenom in msg[0] routes[0]")
                 const msgSwap: any = {
-
+                    sender:jsonTx.msg[0].value.sender,
+                    tokenIn:coins(parseInt(jsonTx.msg[0].value.tokenIn.amount), jsonTx.msg[0].value.tokenIn.denom)[0],
+                    tokenOutMinAmount:jsonTx.msg[0].value.tokenOutMinAmount,
+                    routes:[{
+                        poolId:jsonTx.msg[0].value.routes[0].poolId,
+                        tokenOutDenom:jsonTx.msg[0].value.routes[0].tokenOutDenom
+                    }]
                 };
+                from = jsonTx.msg[0].value.sender
                 msg = {
-                    typeUrl: "/gamm.swap-exact-amount-in",
-                    value: msgRewards,
+                    typeUrl: "/osmosis.gamm.v1beta1.MsgSwapExactAmountIn",
+                    value: msgSwap,
+                };
+                fee = {
+                    amount: coins(parseInt(jsonTx.fee.amount[0].amount), jsonTx.fee.amount[0].denom),
+                    gas: jsonTx.fee.gas,
+                };
+                break;
+            case 'osmosis/gamm/join-pool':
+                if(!jsonTx.msg[0].value.sender) throw Error("Missing sender in msg[0]")
+                if(!jsonTx.msg[0].value.poolId) throw Error("Missing poolId in msg[0]")
+                if(!jsonTx.msg[0].value.shareOutAmount) throw Error("Missing poolId in msg[0]")
+                if(!jsonTx.msg[0].value.tokenInMaxs[0].denom) throw Error("Missing tokenOutMinAmount in msg[0] .denom")
+                if(!jsonTx.msg[0].value.tokenInMaxs[0].amount) throw Error("Missing tokenOutMinAmount in msg[0] .amount")
+                if(!jsonTx.msg[0].value.tokenInMaxs[1].denom) throw Error("Missing tokenOutMinAmount in msg[1] .denom")
+                if(!jsonTx.msg[0].value.tokenInMaxs[1].amount) throw Error("Missing tokenOutMinAmount in msg[1] .amount")
+
+                const msgLpAdd: any = {
+                    sender:jsonTx.msg[0].value.sender,
+                    poolId:jsonTx.msg[0].value.sender,
+                    shareOutAmount:jsonTx.msg[0].value.shareOutAmount,
+                    tokenInMaxs:[
+                        coins(parseInt(jsonTx.msg[0].value.tokenInMaxs[0].amount), jsonTx.msg[0].value.tokenInMaxs[0].denom)[0],
+                        coins(parseInt(jsonTx.msg[0].value.tokenInMaxs[1].amount), jsonTx.msg[0].value.tokenInMaxs[1].denom)[0],
+                    ]
+                };
+                from = jsonTx.msg[0].value.sender
+                msg = {
+                    typeUrl: "/osmosis.gamm.v1beta1.MsgJoinPool",
+                    value: msgLpAdd,
                 };
                 fee = {
                     amount: coins(parseInt(jsonTx.fee.amount[0].amount), jsonTx.fee.amount[0].denom),
@@ -247,6 +302,7 @@ const parse_legacy_tx_format = function(jsonTx:any){
         if(!fee) throw Error("Failed to parse fee!")
         return {msg,from,fee,memo}
     }catch(e){
+        // @ts-ignore
         throw Error(e)
     }
 }

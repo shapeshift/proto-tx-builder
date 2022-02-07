@@ -1,7 +1,7 @@
 {
-  "account_number": "16359",
-  "chain_id": "cosmoshub-4",
-  "sequence": "39",
+  "chain_id": "osmosis-1",
+  "account_number": "95421",
+  "sequence": "40",
   "fee":{
     "amount":[
       {
