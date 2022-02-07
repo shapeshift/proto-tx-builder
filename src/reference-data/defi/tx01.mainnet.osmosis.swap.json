@@ -24,7 +24,7 @@
         ],
         "sender": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq",
         "tokenIn": {
-          "amount": "65000",
+          "amount": "6500",
           "denom": "uosmo"
         },
         "tokenOutMinAmount": "8204"

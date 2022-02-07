@@ -27,6 +27,11 @@ export async function sign(jsonTx:any, seed:string, sequence:string, account_num
         myRegistry.register("/osmosis.gamm.v1beta1.SwapAmountInRoute", codecs.osmosis.gamm.v1beta1.SwapAmountInRoute);
         myRegistry.register("/osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn", codecs.osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn);
 
+        //staking
+        myRegistry.register("/osmosis.lockup.MsgLockTokens", codecs.osmosis.lockup.MsgLockTokens);
+        myRegistry.register("/osmosis.lockup.MsgBeginUnlocking", codecs.osmosis.lockup.MsgBeginUnlocking);
+        myRegistry.register("/osmosis.lockup.MsgBeginUnlockingAll", codecs.osmosis.lockup.MsgBeginUnlockingAll);
+
         const wallet = await DirectSecp256k1HdWallet.fromMnemonic(seed,{hdPaths: [path],prefix});
         const clientOffline = await SigningStargateClient.offline(wallet,{ registry: myRegistry });
         const [account] = await wallet.getAccounts();
@@ -277,7 +282,7 @@ const parse_legacy_tx_format = function(jsonTx:any){
 
                 const msgLpAdd: any = {
                     sender:jsonTx.msg[0].value.sender,
-                    poolId:jsonTx.msg[0].value.sender,
+                    poolId:jsonTx.msg[0].value.poolId,
                     shareOutAmount:jsonTx.msg[0].value.shareOutAmount,
                     tokenInMaxs:[
                         coins(parseInt(jsonTx.msg[0].value.tokenInMaxs[0].amount), jsonTx.msg[0].value.tokenInMaxs[0].denom)[0],
@@ -288,6 +293,73 @@ const parse_legacy_tx_format = function(jsonTx:any){
                 msg = {
                     typeUrl: "/osmosis.gamm.v1beta1.MsgJoinPool",
                     value: msgLpAdd,
+                };
+                fee = {
+                    amount: coins(parseInt(jsonTx.fee.amount[0].amount), jsonTx.fee.amount[0].denom),
+                    gas: jsonTx.fee.gas,
+                };
+                break;
+            case 'osmosis/gamm/exit-pool':
+                if(!jsonTx.msg[0].value.sender) throw Error("Missing sender in msg[0]")
+                if(!jsonTx.msg[0].value.poolId) throw Error("Missing poolId in msg[0]")
+                if(!jsonTx.msg[0].value.shareOutAmount) throw Error("Missing poolId in msg[0]")
+                if(!jsonTx.msg[0].value.tokenInMaxs[0].denom) throw Error("Missing tokenOutMinAmount in msg[0] .denom")
+                if(!jsonTx.msg[0].value.tokenInMaxs[0].amount) throw Error("Missing tokenOutMinAmount in msg[0] .amount")
+                if(!jsonTx.msg[0].value.tokenInMaxs[1].denom) throw Error("Missing tokenOutMinAmount in msg[1] .denom")
+                if(!jsonTx.msg[0].value.tokenInMaxs[1].amount) throw Error("Missing tokenOutMinAmount in msg[1] .amount")
+
+                const msgLpRemove: any = {
+                    sender:jsonTx.msg[0].value.sender,
+                    poolId:jsonTx.msg[0].value.poolId,
+                    shareInAmount:jsonTx.msg[0].value.shareOutAmount,
+                    tokenOutMins:[
+                        coins(parseInt(jsonTx.msg[0].value.tokenInMaxs[0].amount), jsonTx.msg[0].value.tokenInMaxs[0].denom)[0],
+                        coins(parseInt(jsonTx.msg[0].value.tokenInMaxs[1].amount), jsonTx.msg[0].value.tokenInMaxs[1].denom)[0],
+                    ]
+                };
+                from = jsonTx.msg[0].value.sender
+                msg = {
+                    typeUrl: "/osmosis.gamm.v1beta1.MsgExitPool",
+                    value: msgLpRemove,
+                };
+                fee = {
+                    amount: coins(parseInt(jsonTx.fee.amount[0].amount), jsonTx.fee.amount[0].denom),
+                    gas: jsonTx.fee.gas,
+                };
+                break;
+            case 'osmosis/lockup/lock-tokens':
+                if(!jsonTx.msg[0].value.owner) throw Error("Missing owner in msg[0]")
+                if(!jsonTx.msg[0].value.duration) throw Error("Missing duration in msg[0]")
+                if(!jsonTx.msg[0].value.coins[0].denom) throw Error("Missing coins in msg[0] .denom")
+                if(!jsonTx.msg[0].value.coins[0].amount) throw Error("Missing coins in msg[0] .amount")
+
+                const msgLpStake: any = {
+                    owner:jsonTx.msg[0].value.owner,
+                    duration:jsonTx.msg[0].value.poolId,
+                    coins:[
+                        coins(jsonTx.msg[0].value.coins[0].amount, jsonTx.msg[0].value.coins[0].denom)[0],
+                    ]
+                };
+                from = jsonTx.msg[0].value.owner
+                msg = {
+                    typeUrl: "/osmosis.lockup.MsgLockTokens",
+                    value: msgLpStake,
+                };
+                fee = {
+                    amount: coins(parseInt(jsonTx.fee.amount[0].amount), jsonTx.fee.amount[0].denom),
+                    gas: jsonTx.fee.gas,
+                };
+                break;
+            case 'osmosis/lockup/begin-unlock-period-lock':
+                if(!jsonTx.msg[0].value.owner) throw Error("Missing owner in msg[0]")
+
+                const msgLpStakeRemove: any = {
+                    owner:jsonTx.msg[0].value.owner
+                };
+                from = jsonTx.msg[0].value.owner
+                msg = {
+                    typeUrl: "/osmosis.lockup.MsgBeginUnlockingAll",
+                    value: msgLpStakeRemove,
                 };
                 fee = {
                     amount: coins(parseInt(jsonTx.fee.amount[0].amount), jsonTx.fee.amount[0].denom),

@@ -1250,7 +1250,7 @@ export namespace osmosis {
 				public poolId: Long;
 
 				/** MsgExitPool shareInAmount. */
-				public shareInAmount: string;
+				public msgLpStakeRemove: string;
 
 				/** MsgExitPool tokenOutMins. */
 				public tokenOutMins: cosmos.base.v1beta1.ICoin[];
