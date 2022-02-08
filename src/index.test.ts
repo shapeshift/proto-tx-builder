@@ -6,18 +6,13 @@ import * as path from 'path'
 
 import { sign } from '.'
 
-const supported_assets = [
-  'cosmos',
-  'osmosis'
-  // 'thorchain',
-  // 'terra',
-  // 'kava',
-  // 'secret',
-] as const
-
 const prefixes = {
   osmosis: 'osmo',
-  cosmos: 'cosmos'
+  cosmos: 'cosmos',
+  // thorchain: 'thor',
+  // terra: 'terra',
+  // kava: 'kava',
+  // secret: 'secret'
 } as const
 
 async function makeReferenceSeedSigner(prefix: string) {
