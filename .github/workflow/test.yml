@@ -1,12 +1,11 @@
 name: Build & Test
 on:
-  pull-request:
-    branches-ignore:
+  pull_request:
+    branch:
       - main
 
 jobs:
-  release:
-    name: Build & Test
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
