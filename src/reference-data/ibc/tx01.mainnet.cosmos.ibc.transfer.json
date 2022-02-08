@@ -2,17 +2,17 @@
   "account_number": "16359",
   "chain_id": "cosmoshub-4",
   "sequence": "27",
-  "fee":{
-    "amount":[
+  "fee": {
+    "amount": [
       {
-        "amount":"2800",
-        "denom":"uatom"
+        "amount": "2800",
+        "denom": "uatom"
       }
     ],
-    "gas":"290000"
+    "gas": "290000"
   },
-  "memo":"",
-  "msg":[
+  "memo": "",
+  "msg": [
     {
       "type": "cosmos-sdk/MsgTransfer",
       "value": {
