@@ -52,9 +52,8 @@ describe('signs Tendermint transactions', () => {
       /[.-]/,
       ' '
     )} transaction (${txNum})`, async () => {
-      if (!(txAsset in prefixes)) throw new Error(`unrecognized asset type '${txAsset}'`)
-      const prefix = prefixes[txAsset as keyof typeof prefixes]
-      const signer = await signers[txAsset as keyof typeof prefixes]
+      if (!(txAsset in signers)) throw new Error(`unrecognized asset type '${txAsset}'`)
+      const signer = await signers[txAsset as keyof typeof signers]
 
       // get reference data
       const referenceTx = JSON.parse(
