@@ -4,10 +4,10 @@
     "module": "commonjs",
     "lib": ["es6", "es2015", "dom"],
     "declaration": true,
-    "outDir": "lib",
+    "outDir": "dist",
     "rootDir": "src",
     "strict": true,
-    "types": ["node","jest"],
+    "types": ["node", "jest"],
     "esModuleInterop": true
   }
 }
