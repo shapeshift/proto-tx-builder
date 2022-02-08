@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/proto-tx-builder",
-  "version": "1.0.12",
+  "version": "0.1.0",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
