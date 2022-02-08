@@ -2,7 +2,7 @@ import { coins, Registry, OfflineDirectSigner } from "@cosmjs/proto-signing";
 import { SigningStargateClient, defaultRegistryTypes as defaultStargateTypes } from "@cosmjs/stargate";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 
-import * as codecs from "./generated";
+import * as codecs from "./protobuf";
 
 export async function sign(jsonTx: any, signer: OfflineDirectSigner, sequence: string, accountNumber: string, chainId: string): Promise<{
     serialized: string;

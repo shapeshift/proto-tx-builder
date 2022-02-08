@@ -1,8 +1,12 @@
 *
+!/.gitignore
+!/.gitmodules
+!/.jest.config.js
+!/.github
+!/.github/**
+!/osmosis-frontend
+!/package.json
 !/src
 !/src/**
-!/.gitignore
-!/.jest.config.js
-!/package.json
 !/tsconfig.json
 !/yarn.lock
