@@ -1,0 +1,3 @@
+[submodule "osmosis-frontend"]
+	path = osmosis-frontend
+	url = https://github.com/osmosis-labs/osmosis-frontend

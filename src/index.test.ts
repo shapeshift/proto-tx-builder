@@ -1,375 +1,85 @@
-import {sign} from '../src/index';
-let {
-    SLIP_44_BY_LONG,
-    bip32ToAddressNList
-} = require('@pioneer-platform/pioneer-coins')
-import { mnemonicToSeed, validateMnemonic } from "bip39";
-import * as bitcoin from "@bithighlander/bitcoin-cash-js-lib";
-import { default as util } from "./util";
-import { getNetwork } from "./networks";
-const fs = require("fs");
-const log = require("@pioneer-platform/loggerdog")()
+import { Slip10RawIndex } from '@cosmjs/crypto'
+import { DirectSecp256k1HdWallet, OfflineDirectSigner } from '@cosmjs/proto-signing'
+import * as fs from 'fs'
+import glob from 'glob'
+import * as path from 'path'
 
-const supported_assets = [
-    'cosmos',
-    'osmosis',
-    // 'thorchain',
-    // 'terra',
-    // 'kava',
-    // 'secret',
+import { sign } from '.'
 
-]
+const prefixes = {
+  osmosis: 'osmo',
+  cosmos: 'cosmos',
+  // thorchain: 'thor',
+  // terra: 'terra',
+  // kava: 'kava',
+  // secret: 'secret'
+} as const
 
-let prefixs = {
-    'osmosis':'osmo',
-    'cosmos':'cosmos'
+async function makeReferenceSeedSigner(prefix: string) {
+  return await DirectSecp256k1HdWallet.fromMnemonic(
+    'alcohol woman abuse must during monitor noble actual mixed trade anger aisle',
+    {
+      hdPaths: [
+        [
+          Slip10RawIndex.hardened(44),
+          Slip10RawIndex.hardened(118),
+          Slip10RawIndex.hardened(0),
+          Slip10RawIndex.normal(0),
+          Slip10RawIndex.normal(0)
+        ]
+      ],
+      prefix
+    }
+  )
 }
 
-const REFERENCE_SEED = "alcohol woman abuse must during monitor noble actual mixed trade anger aisle"
-
-describe('signs Tendermint transactions', async function() {
-    let tag = ' | sign | '
-    let asset = 'osmosis'
-    for(let i = 0; i < supported_assets.length; i++){
-        let asset = supported_assets[i]
-        console.log("ASSET: ",asset)
-
-        //Osmosis only
-        if(asset === 'osmosis'){
-            it('signs a mainnet '+asset+' reference lp unstake transaction', async function() {
-                //get reference data
-                let referenceTx = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.lp-unstake.json');
-                referenceTx = JSON.parse(referenceTx.toString())
-
-                let referenceTxSigned = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.lp-unstake.signed.json');
-                referenceTxSigned = JSON.parse(referenceTxSigned.toString())
-
-                // log.info(tag,"referenceTx: ",referenceTx)
-                // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
-                expect(referenceTx).toBeTruthy();
-                expect(referenceTxSigned).toBeTruthy();
-
-                const network = getNetwork(asset);
-                const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
-
-                const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
-                log.info(tag,"masterPath: ",masterPath)
-                // const keyPair = util.getKeyPair(wallet, masterPath, asset);
-                // log.info(tag,"keyPair: ",keyPair)
-                // @ts-ignore
-                let prefix = prefixs[asset]
-                const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
-                log.info(tag,"result: ",result)
-
-
-                expect(result.serialized).toBe(referenceTxSigned.serialized);
-                expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
-            });
-
-            it('signs a mainnet '+asset+' reference lp stake transaction', async function() {
-                //get reference data
-                let referenceTx = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.lp-stake.json');
-                referenceTx = JSON.parse(referenceTx.toString())
-
-                let referenceTxSigned = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.lp-stake.signed.json');
-                referenceTxSigned = JSON.parse(referenceTxSigned.toString())
-
-                // log.info(tag,"referenceTx: ",referenceTx)
-                // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
-                expect(referenceTx).toBeTruthy();
-                expect(referenceTxSigned).toBeTruthy();
-
-                const network = getNetwork(asset);
-                const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
-
-                const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
-                log.info(tag,"masterPath: ",masterPath)
-                // const keyPair = util.getKeyPair(wallet, masterPath, asset);
-                // log.info(tag,"keyPair: ",keyPair)
-                // @ts-ignore
-                let prefix = prefixs[asset]
-                const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
-                log.info(tag,"result: ",result)
-
-
-                expect(result.serialized).toBe(referenceTxSigned.serialized);
-                expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
-            });
-
-            it('signs a mainnet '+asset+' reference lp remove transaction', async function() {
-                //get reference data
-                let referenceTx = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.lp-remove.json');
-                referenceTx = JSON.parse(referenceTx.toString())
-
-                let referenceTxSigned = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.lp-remove.signed.json');
-                referenceTxSigned = JSON.parse(referenceTxSigned.toString())
-
-                // log.info(tag,"referenceTx: ",referenceTx)
-                // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
-                expect(referenceTx).toBeTruthy();
-                expect(referenceTxSigned).toBeTruthy();
-
-                const network = getNetwork(asset);
-                const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
-
-                const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
-                log.info(tag,"masterPath: ",masterPath)
-                // const keyPair = util.getKeyPair(wallet, masterPath, asset);
-                // log.info(tag,"keyPair: ",keyPair)
-                // @ts-ignore
-                let prefix = prefixs[asset]
-                const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
-                log.info(tag,"result: ",result)
-
-
-                expect(result.serialized).toBe(referenceTxSigned.serialized);
-                expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
-            });
-
-            it('signs a mainnet '+asset+' reference lp add transaction', async function() {
-                //get reference data
-                let referenceTx = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.lp-add.json');
-                referenceTx = JSON.parse(referenceTx.toString())
-
-                let referenceTxSigned = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.lp-add.signed.json');
-                referenceTxSigned = JSON.parse(referenceTxSigned.toString())
-
-                // log.info(tag,"referenceTx: ",referenceTx)
-                // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
-                expect(referenceTx).toBeTruthy();
-                expect(referenceTxSigned).toBeTruthy();
-
-                const network = getNetwork(asset);
-                const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
-
-                const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
-                log.info(tag,"masterPath: ",masterPath)
-                // const keyPair = util.getKeyPair(wallet, masterPath, asset);
-                // log.info(tag,"keyPair: ",keyPair)
-                // @ts-ignore
-                let prefix = prefixs[asset]
-                const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
-                log.info(tag,"result: ",result)
-
-
-                expect(result.serialized).toBe(referenceTxSigned.serialized);
-                expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
-            });
-
-            it('signs a mainnet '+asset+' reference swap transaction', async function() {
-                //get reference data
-                let referenceTx = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.swap.json');
-                referenceTx = JSON.parse(referenceTx.toString())
-
-                let referenceTxSigned = fs.readFileSync('./src/reference-data/defi/tx01.mainnet.'+asset+'.swap.signed.json');
-                referenceTxSigned = JSON.parse(referenceTxSigned.toString())
-
-                // log.info(tag,"referenceTx: ",referenceTx)
-                // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
-                expect(referenceTx).toBeTruthy();
-                expect(referenceTxSigned).toBeTruthy();
-
-                const network = getNetwork(asset);
-                const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
-
-                const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
-                log.info(tag,"masterPath: ",masterPath)
-                // const keyPair = util.getKeyPair(wallet, masterPath, asset);
-                // log.info(tag,"keyPair: ",keyPair)
-                // @ts-ignore
-                let prefix = prefixs[asset]
-                const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
-                log.info(tag,"result: ",result)
-
-
-                expect(result.serialized).toBe(referenceTxSigned.serialized);
-                expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
-            });
-        }
-
-        //IBC
-        if(asset != 'osmosis') {
-            it('signs a mainnet '+asset+' reference IBC transfer transaction', async function() {
-                //get reference data
-                let referenceTx = fs.readFileSync('./src/reference-data/ibc/tx01.mainnet.'+asset+'.ibc.transfer.json');
-                referenceTx = JSON.parse(referenceTx.toString())
-
-                let referenceTxSigned = fs.readFileSync('./src/reference-data/ibc/tx01.mainnet.'+asset+'.ibc.transfer.signed.json');
-                referenceTxSigned = JSON.parse(referenceTxSigned.toString())
-
-                // log.info(tag,"referenceTx: ",referenceTx)
-                // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
-                expect(referenceTx).toBeTruthy();
-                expect(referenceTxSigned).toBeTruthy();
-
-                const network = getNetwork(asset);
-                const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
-
-                const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
-                log.info(tag,"masterPath: ",masterPath)
-                // const keyPair = util.getKeyPair(wallet, masterPath, asset);
-                // log.info(tag,"keyPair: ",keyPair)
-                // @ts-ignore
-                let prefix = prefixs[asset]
-                const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
-                log.info(tag,"result: ",result)
-
-
-                expect(result.serialized).toBe(referenceTxSigned.serialized);
-                expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
-            });
-        }
-        it('signs a mainnet '+asset+' reference undelegate transaction', async function() {
-            //get reference data
-            let referenceTx = fs.readFileSync('./src/reference-data/staking/tx01.mainnet.'+asset+'.undelegate.json');
-            referenceTx = JSON.parse(referenceTx.toString())
-
-            let referenceTxSigned = fs.readFileSync('./src/reference-data/staking/tx01.mainnet.'+asset+'.undelegate.signed.json');
-            referenceTxSigned = JSON.parse(referenceTxSigned.toString())
-
-            // log.info(tag,"referenceTx: ",referenceTx)
-            // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
-            expect(referenceTx).toBeTruthy();
-            expect(referenceTxSigned).toBeTruthy();
-
-            const network = getNetwork(asset);
-            const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
-
-            const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
-            log.info(tag,"masterPath: ",masterPath)
-            // const keyPair = util.getKeyPair(wallet, masterPath, asset);
-            // log.info(tag,"keyPair: ",keyPair)
-            // @ts-ignore
-            let prefix = prefixs[asset]
-            const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
-            log.info(tag,"result: ",result)
-
-
-            expect(result.serialized).toBe(referenceTxSigned.serialized);
-            expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
-        });
-
-        it('signs a mainnet '+asset+' reference claim rewards transaction', async function() {
-            //get reference data
-            let referenceTx = fs.readFileSync('./src/reference-data/staking/tx01.mainnet.'+asset+'.rewards.json');
-            referenceTx = JSON.parse(referenceTx.toString())
-
-            let referenceTxSigned = fs.readFileSync('./src/reference-data/staking/tx01.mainnet.'+asset+'.rewards.signed.json');
-            referenceTxSigned = JSON.parse(referenceTxSigned.toString())
-
-            // log.info(tag,"referenceTx: ",referenceTx)
-            // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
-            expect(referenceTx).toBeTruthy();
-            expect(referenceTxSigned).toBeTruthy();
-
-            const network = getNetwork(asset);
-            const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
-
-            const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
-            log.info(tag,"masterPath: ",masterPath)
-            // const keyPair = util.getKeyPair(wallet, masterPath, asset);
-            // log.info(tag,"keyPair: ",keyPair)
-            // @ts-ignore
-            let prefix = prefixs[asset]
-            const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
-            log.info(tag,"result: ",result)
-
-
-            expect(result.serialized).toBe(referenceTxSigned.serialized);
-            expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
-        });
-
-        it('signs a mainnet '+asset+' reference redelegate transaction', async function() {
-            //get reference data
-            let referenceTx = fs.readFileSync('./src/reference-data/staking/tx01.mainnet.'+asset+'.redelegate.json');
-            referenceTx = JSON.parse(referenceTx.toString())
-
-            let referenceTxSigned = fs.readFileSync('./src/reference-data/staking/tx01.mainnet.'+asset+'.redelegate.signed.json');
-            referenceTxSigned = JSON.parse(referenceTxSigned.toString())
-
-            // log.info(tag,"referenceTx: ",referenceTx)
-            // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
-            expect(referenceTx).toBeTruthy();
-            expect(referenceTxSigned).toBeTruthy();
-
-            const network = getNetwork(asset);
-            const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
-
-            const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
-            log.info(tag,"masterPath: ",masterPath)
-            // const keyPair = util.getKeyPair(wallet, masterPath, asset);
-            // log.info(tag,"keyPair: ",keyPair)
-            // @ts-ignore
-            let prefix = prefixs[asset]
-            const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
-            log.info(tag,"result: ",result)
-
-
-            expect(result.serialized).toBe(referenceTxSigned.serialized);
-            expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
-        });
-
-        it('signs a mainnet '+asset+' reference delegate transaction', async function() {
-            //get reference data
-            let referenceTx = fs.readFileSync('./src/reference-data/staking/tx01.mainnet.'+asset+'.delegate.json');
-            referenceTx = JSON.parse(referenceTx.toString())
-
-            let referenceTxSigned = fs.readFileSync('./src/reference-data/staking/tx01.mainnet.'+asset+'.delegate.signed.json');
-            referenceTxSigned = JSON.parse(referenceTxSigned.toString())
-
-            // log.info(tag,"referenceTx: ",referenceTx)
-            // log.info(tag,"referenceTxSigned: ",referenceTxSigned)
-            expect(referenceTx).toBeTruthy();
-            expect(referenceTxSigned).toBeTruthy();
-
-            const network = getNetwork(asset);
-            const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
-
-            const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
-            log.info(tag,"masterPath: ",masterPath)
-            // const keyPair = util.getKeyPair(wallet, masterPath, asset);
-            // log.info(tag,"keyPair: ",keyPair)
-            // @ts-ignore
-            let prefix = prefixs[asset]
-            const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
-            log.info(tag,"result: ",result)
-
-
-            expect(result.serialized).toBe(referenceTxSigned.serialized);
-            expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
-        });
-
-        it('signs a mainnet '+asset+' reference transfer transaction', async function() {
-            //get reference data
-            let referenceTx = fs.readFileSync('./src/reference-data/transfers/tx01.mainnet.'+asset+'.json');
-            referenceTx = JSON.parse(referenceTx.toString())
-
-            let referenceTxSigned = fs.readFileSync('./src/reference-data/transfers/tx01.mainnet.'+asset+'.signed.json');
-            referenceTxSigned = JSON.parse(referenceTxSigned.toString())
-
-            log.info(tag,"referenceTx: ",referenceTx)
-            log.info(tag,"referenceTxSigned: ",referenceTxSigned)
-            expect(referenceTx).toBeTruthy();
-            expect(referenceTxSigned).toBeTruthy();
-
-            const network = getNetwork(asset);
-            const wallet = bitcoin.bip32.fromSeed(await mnemonicToSeed(REFERENCE_SEED), network);
-
-            const masterPath = bip32ToAddressNList("m/44'/"+SLIP_44_BY_LONG[asset].toString()+"'/0'/0/0")
-            log.info(tag,"masterPath: ",masterPath)
-            // const keyPair = util.getKeyPair(wallet, masterPath, asset);
-            // log.info(tag,"keyPair: ",keyPair)
-            // @ts-ignore
-            let prefix = prefixs[asset]
-            const result = await sign(referenceTx, REFERENCE_SEED, referenceTx.sequence, referenceTx.account_number, referenceTx.chain_id, prefix);
-            log.info(tag,"result: ",result)
-
-
-            expect(result.serialized).toBe(referenceTxSigned.serialized);
-            expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0]);
-        });
-
-    }
-
-
-});
+const signers = Object.entries(prefixes)
+  .map(([k, v]) => [k, makeReferenceSeedSigner(v)] as const)
+  .reduce<Record<string, Promise<OfflineDirectSigner>>>((acc, [k, v]) => ((acc[k] = v), acc), {})
+
+describe('signs Tendermint transactions', () => {
+  for (const signedJsonPath of glob.sync('src/reference-data/**/*.signed.json')) {
+    const unsignedJsonPath = signedJsonPath.replace(/\.signed\.json$/, '.json')
+    const signedJsonBasename = path.basename(signedJsonPath)
+    const signedJsonPathSegments = /^([^.]+)\.([^.]+)\.([^.]+)\.(.+)\.signed\.json$/.exec(
+      signedJsonBasename
+    )
+    if (!signedJsonPathSegments)
+      throw new Error(`test name doesn't match pattern: ${signedJsonBasename}`)
+
+    const [, txNum, txNet, txAsset, txType] = signedJsonPathSegments
+    it(`signs a ${txNet} ${txAsset} reference ${txType.replace(
+      /[.-]/,
+      ' '
+    )} transaction (${txNum})`, async () => {
+      if (!(txAsset in prefixes)) throw new Error(`unrecognized asset type '${txAsset}'`)
+      const prefix = prefixes[txAsset as keyof typeof prefixes]
+      const signer = await signers[txAsset as keyof typeof prefixes]
+
+      // get reference data
+      const referenceTx = JSON.parse(
+        fs.readFileSync(unsignedJsonPath, {
+          encoding: 'utf8'
+        })
+      )
+      const referenceTxSigned = JSON.parse(fs.readFileSync(signedJsonPath, { encoding: 'utf8' }))
+
+      // console.info(tag,"referenceTx: ",referenceTx)
+      // console.info(tag,"referenceTxSigned: ",referenceTxSigned)
+      expect(referenceTx).toBeTruthy()
+      expect(referenceTxSigned).toBeTruthy()
+
+      const result = await sign(
+        referenceTx,
+        signer,
+        referenceTx.sequence,
+        referenceTx.account_number,
+        referenceTx.chain_id
+      )
+      console.info('result: ', result)
+
+      expect(result.serialized).toBe(referenceTxSigned.serialized)
+      expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0])
+    })
+  }
+})
