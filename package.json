@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/proto-tx-builder",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Builds and signs new-style protobuf SIGN_MODE_DIRECT Cosmos SDK transactions",
   "author": "ShapeShift DAO",
   "license": "MIT",
