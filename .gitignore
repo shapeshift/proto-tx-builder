@@ -4,6 +4,7 @@
 !/.jest.config.js
 !/.github
 !/.github/**
+!/CODEOWNERS
 !/osmosis-frontend
 !/package.json
 !/src
