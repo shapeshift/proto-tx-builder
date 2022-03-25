@@ -1,13 +1,10 @@
 import { Slip10RawIndex } from '@cosmjs/crypto'
-import { DirectSecp256k1HdWallet, Registry, OfflineDirectSigner, coin } from '@cosmjs/proto-signing'
-import { SigningStargateClient, SigningStargateClientOptions, StargateClient, StdFee, GasPrice, defaultRegistryTypes as defaultStargateTypes } from "@cosmjs/stargate"
-import * as codecs from './protobuf'
+import { DirectSecp256k1HdWallet, OfflineDirectSigner } from '@cosmjs/proto-signing'
 import * as fs from 'fs'
 import glob from 'glob'
 import * as path from 'path'
 
 import { sign } from '.'
-import { MsgSend } from './proto/generated/thorchain/v1/x/thorchain/types'
 
 const prefixes = {
   osmosis: 'osmo',
