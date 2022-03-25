@@ -3,6 +3,7 @@ import {
   SigningStargateClient,
   defaultRegistryTypes as defaultStargateTypes
 } from '@cosmjs/stargate'
+import { toAccAddress } from '@cosmjs/stargate/build/queryclient/utils'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 import * as codecs from './protobuf'
@@ -20,6 +21,7 @@ export async function sign(
   signatures: string[]
 }> {
   const myRegistry = new Registry(defaultStargateTypes)
+  console.log(`sign: seq: ${sequence}, acctNum: ${accountNumber}, chainId: ${chainId}`)
 
   // custom osmosis modules
   myRegistry.register(
@@ -63,8 +65,12 @@ export async function sign(
     codecs.osmosis.lockup.MsgBeginUnlockingAll
   )
 
+  // thorchain
+  myRegistry.register('/types.MsgSend', codecs.thorchain_types.MsgSend)
+  myRegistry.register('/types.MsgDeposit', codecs.thorchain_types.MsgDeposit)
+
   const clientOffline = await SigningStargateClient.offline(signer, {
-    registry: myRegistry
+    registry: myRegistry,
   })
 
   const { msg, from, fee, memo } = parse_legacy_tx_format(jsonTx)
@@ -74,7 +80,10 @@ export async function sign(
     sequence: Number(sequence),
     chainId
   })
-
+  // console.log('signedTx: ', JSON.stringify(txRaw))
+  // const hexd = Buffer.from(TxRaw.encode(txRaw).finish()).toString('hex')
+  // broadcast following line's output
+  // console.info(`0x${hexd}`)
   const output = {
     serialized: Buffer.from(TxRaw.encode(txRaw).finish()).toString('base64'),
     body: Buffer.from(txRaw.bodyBytes).toString('base64'),
@@ -121,6 +130,21 @@ type LegacyMsg = { type: string; value: any }
 function convertLegacyMsg(msg: LegacyMsg) {
   // switch for each tx type supported
   switch (msg.type) {
+    case 'thorchain/MsgSend':
+      if (!msg.value.from_address) throw new Error('Missing from_address in msg')
+      if (!msg.value.to_address) throw new Error('Missing to_address in msg')
+
+      return {
+        from: msg.value.from_address,
+        msg: {
+          typeUrl: '/types.MsgSend',
+          value: {
+            fromAddress: toAccAddress(msg.value.from_address),
+            toAddress: toAccAddress(msg.value.to_address),
+            amount: scrubCoins(msg.value.amount)
+          }
+        }
+    }
     case 'cosmos-sdk/MsgSend':
       if (!msg.value.from_address) throw new Error('Missing from_address in msg')
       if (!msg.value.to_address) throw new Error('Missing to_address in msg')

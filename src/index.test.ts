@@ -1,28 +1,36 @@
 import { Slip10RawIndex } from '@cosmjs/crypto'
-import { DirectSecp256k1HdWallet, OfflineDirectSigner } from '@cosmjs/proto-signing'
+import { DirectSecp256k1HdWallet, Registry, OfflineDirectSigner, coin } from '@cosmjs/proto-signing'
+import { SigningStargateClient, SigningStargateClientOptions, StargateClient, StdFee, GasPrice, defaultRegistryTypes as defaultStargateTypes } from "@cosmjs/stargate"
+import * as codecs from './protobuf'
 import * as fs from 'fs'
 import glob from 'glob'
 import * as path from 'path'
 
 import { sign } from '.'
+import { MsgSend } from './proto/generated/thorchain/v1/x/thorchain/types'
 
 const prefixes = {
   osmosis: 'osmo',
   cosmos: 'cosmos',
-  // thorchain: 'thor',
+  thorchain: 'thor',
   // terra: 'terra',
   // kava: 'kava',
   // secret: 'secret'
 } as const
 
-async function makeReferenceSeedSigner(prefix: string) {
-  return await DirectSecp256k1HdWallet.fromMnemonic(
+const coinTypes: Record<string, number> = {cosmos: 118,osmosis: 118, thorchain: 931}
+const defaultCoinType = coinTypes.cosmos
+
+// TODO - options argument with acceess to full path, or change prefixes to a general config obj per chain
+async function makeReferenceSeedSigner(prefix: string, coinType?: number) {
+  coinType = coinType || defaultCoinType
+  const w = await DirectSecp256k1HdWallet.fromMnemonic(
     'alcohol woman abuse must during monitor noble actual mixed trade anger aisle',
     {
       hdPaths: [
         [
           Slip10RawIndex.hardened(44),
-          Slip10RawIndex.hardened(118),
+          Slip10RawIndex.hardened(coinType),
           Slip10RawIndex.hardened(0),
           Slip10RawIndex.normal(0),
           Slip10RawIndex.normal(0)
@@ -31,10 +39,15 @@ async function makeReferenceSeedSigner(prefix: string) {
       prefix
     }
   )
+  const accts = await w.getAccounts()
+  // console.log(`got ${accts.length} accounts`)
+
+  console.log(`address: ${accts[0].address}`)
+  return w
 }
 
 const signers = Object.entries(prefixes)
-  .map(([k, v]) => [k, makeReferenceSeedSigner(v)] as const)
+  .map(([k, v]) => [k, makeReferenceSeedSigner(v, coinTypes[k])] as const)
   .reduce<Record<string, Promise<OfflineDirectSigner>>>((acc, [k, v]) => ((acc[k] = v), acc), {})
 
 describe('signs Tendermint transactions', () => {
@@ -63,7 +76,7 @@ describe('signs Tendermint transactions', () => {
       )
       const referenceTxSigned = JSON.parse(fs.readFileSync(signedJsonPath, { encoding: 'utf8' }))
 
-      // console.info(tag,"referenceTx: ",referenceTx)
+      // console.info("referenceTx: ",referenceTx)
       // console.info(tag,"referenceTxSigned: ",referenceTxSigned)
       expect(referenceTx).toBeTruthy()
       expect(referenceTxSigned).toBeTruthy()
