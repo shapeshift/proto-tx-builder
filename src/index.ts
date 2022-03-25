@@ -21,7 +21,7 @@ export async function sign(
   signatures: string[]
 }> {
   const myRegistry = new Registry(defaultStargateTypes)
-  console.log(`sign: seq: ${sequence}, acctNum: ${accountNumber}, chainId: ${chainId}`)
+  console.log(`proto-tx-builder seq: ${sequence}, acctNum: ${accountNumber}, chainId: ${chainId}`)
 
   // custom osmosis modules
   myRegistry.register(
@@ -70,7 +70,7 @@ export async function sign(
   myRegistry.register('/types.MsgDeposit', codecs.thorchain_types.MsgDeposit)
 
   const clientOffline = await SigningStargateClient.offline(signer, {
-    registry: myRegistry,
+    registry: myRegistry
   })
 
   const { msg, from, fee, memo } = parse_legacy_tx_format(jsonTx)

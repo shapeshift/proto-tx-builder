@@ -15,6 +15,7 @@ const prefixes = {
   // secret: 'secret'
 } as const
 
+// TODO - combine this with prefixes as a chain config object
 const coinTypes: Record<string, number> = {cosmos: 118,osmosis: 118, thorchain: 931}
 const defaultCoinType = coinTypes.cosmos
 
