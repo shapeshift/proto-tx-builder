@@ -38,8 +38,6 @@ async function makeReferenceSeedSigner(prefix: string, coinType?: number) {
     }
   )
   const accts = await w.getAccounts()
-  // console.log(`got ${accts.length} accounts`)
-
   console.log(`address: ${accts[0].address}`)
   return w
 }
@@ -87,6 +85,8 @@ describe('signs Tendermint transactions', () => {
       console.info('result: ', JSON.stringify(result))
 
       expect(result.serialized).toBe(referenceTxSigned.serialized)
+      
+      // re-gen the other signed reference txs and remove this if condition
       if (txAsset === "thorchain") {
         expect(result.hex).toBe(referenceTxSigned.hex)
       }

@@ -22,7 +22,7 @@ export async function sign(
   signatures: string[]
 }> {
   const myRegistry = new Registry(defaultStargateTypes)
-  console.log(`proto-tx-builder seq: ${sequence}, acctNum: ${accountNumber}, chainId: ${chainId}`)
+  console.log(`proto-tx-builder.sign seq: ${sequence}, acctNum: ${accountNumber}, chainId: ${chainId}`)
 
   // custom osmosis modules
   myRegistry.register(
@@ -74,7 +74,6 @@ export async function sign(
     registry: myRegistry
   })
 
-  // console.info('calling parse_legacy_tx_format: ', JSON.stringify(jsonTx))
   const convertedMsg = parse_legacy_tx_format(jsonTx)
   // console.info('CONVERTED TX: ', JSON.stringify(x))
   const { msg, from, fee, memo } = convertedMsg
@@ -83,7 +82,7 @@ export async function sign(
     throw new Error('fee must be defined after conversion')
   }
 
-  console.info(`calling clientOffline.sign with ${from}, ${JSON.stringify(fee)}, ${memo}. msg: `, JSON.stringify(msg))
+  // console.info(`calling clientOffline.sign with ${from}, ${JSON.stringify(fee)}, ${memo}. msg: `, JSON.stringify(msg))
   const txRaw = await clientOffline.sign(from, [msg], fee, memo || '', {
     accountNumber: Number(accountNumber),
     sequence: Number(sequence),
@@ -109,7 +108,7 @@ const scrubCoin = (x: Coin) => {
 
   return coin(x.amount, x.denom)
 }
-const scrubCoins = (x: Coin[]) => x.filter((c) => c.amount && c.amount !== "0").map(scrubCoin)
+const scrubCoins = (x: Coin[]) => x.filter(c => c.amount && c.amount !== "0").map(scrubCoin)
 
 type Route = { poolId: unknown; tokenOutDenom: unknown }
 const scrubRoute = (x: Route) => {
