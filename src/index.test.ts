@@ -74,8 +74,6 @@ describe('signs Tendermint transactions', () => {
       )
       const referenceTxSigned = JSON.parse(fs.readFileSync(signedJsonPath, { encoding: 'utf8' }))
 
-      // console.info("referenceTx: ",referenceTx)
-      // console.info(tag,"referenceTxSigned: ",referenceTxSigned)
       expect(referenceTx).toBeTruthy()
       expect(referenceTxSigned).toBeTruthy()
 
@@ -86,9 +84,12 @@ describe('signs Tendermint transactions', () => {
         referenceTx.account_number,
         referenceTx.chain_id
       )
-      console.info('result: ', result)
+      console.info('result: ', JSON.stringify(result))
 
       expect(result.serialized).toBe(referenceTxSigned.serialized)
+      if (txAsset === "thorchain") {
+        expect(result.hex).toBe(referenceTxSigned.hex)
+      }
       expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0])
     })
   }

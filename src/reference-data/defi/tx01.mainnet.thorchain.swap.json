@@ -1,0 +1,28 @@
+{
+  "chain_id": "thorchain",
+  "account_number": 12345,
+  "sequence": 1,
+  
+  "msg": [
+    {
+      "type": "thorchain/MsgDeposit",
+      "value": {
+        "coins": [
+          {
+            "asset": "THOR.RUNE",
+            "amount": "10000000"
+          }
+        ],
+        "memo": "=:BNB.BNB:bnb1n9y9q60u6df9gjgnjkr7udcucz934q0xzlq54u:12345",
+        "signer": "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az"
+      }
+    }
+  ],
+  "fee": {
+    "amount": [],
+    "gas": "50000000"
+  },
+  "signatures": [],
+  "memo": "=:BNB.BNB:bnb1n9y9q60u6df9gjgnjkr7udcucz934q0xzlq54u:12345",
+  "timeout_height": "0"
+}

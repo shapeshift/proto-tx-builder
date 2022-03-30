@@ -18,8 +18,7 @@
     }
   ],
   "fee": {
-    "amount": [
-    ],
+    "amount": [],
     "gas": "1000000"
   },
   "signatures": [],
