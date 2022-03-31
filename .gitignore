@@ -7,7 +7,11 @@
 !/CODEOWNERS
 !/osmosis-frontend
 !/package.json
+!/proto
+!/proto/**
 !/src
 !/src/**
+!/third_party
+!/third_party/**
 !/tsconfig.json
 !/yarn.lock
