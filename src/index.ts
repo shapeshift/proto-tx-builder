@@ -3,6 +3,7 @@ import {
   SigningStargateClient,
   defaultRegistryTypes as defaultStargateTypes
 } from '@cosmjs/stargate'
+import { toAccAddress } from '@cosmjs/stargate/build/queryclient/utils'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 import * as codecs from './protobuf'
@@ -15,11 +16,13 @@ export async function sign(
   chainId: string
 ): Promise<{
   serialized: string
+  hex: string
   body: string
   authInfoBytes: string
   signatures: string[]
 }> {
   const myRegistry = new Registry(defaultStargateTypes)
+  console.log(`proto-tx-builder.sign seq: ${sequence}, acctNum: ${accountNumber}, chainId: ${chainId}`)
 
   // custom osmosis modules
   myRegistry.register(
@@ -63,24 +66,39 @@ export async function sign(
     codecs.osmosis.lockup.MsgBeginUnlockingAll
   )
 
+  // thorchain
+  myRegistry.register('/types.MsgSend', codecs.thorchain_types.MsgSend)
+  myRegistry.register('/types.MsgDeposit', codecs.thorchain_types.MsgDeposit)
+
   const clientOffline = await SigningStargateClient.offline(signer, {
     registry: myRegistry
   })
 
-  const { msg, from, fee, memo } = parse_legacy_tx_format(jsonTx)
+  const convertedMsg = parse_legacy_tx_format(jsonTx)
+  // console.info('CONVERTED TX: ', JSON.stringify(x))
+  const { msg, from, fee, memo } = convertedMsg
 
-  const txRaw = await clientOffline.sign(from, [msg], fee, memo, {
+  if (!fee) {
+    throw new Error('fee must be defined after conversion')
+  }
+
+  // console.info(`calling clientOffline.sign with ${from}, ${JSON.stringify(fee)}, ${memo}. msg: `, JSON.stringify(msg))
+  const txRaw = await clientOffline.sign(from, [msg], fee, memo || '', {
     accountNumber: Number(accountNumber),
     sequence: Number(sequence),
     chainId
   })
+  // console.log('signedTx: ', JSON.stringify(txRaw))
 
+  const encoded = TxRaw.encode(txRaw).finish()
   const output = {
-    serialized: Buffer.from(TxRaw.encode(txRaw).finish()).toString('base64'),
+    serialized: Buffer.from(encoded).toString('base64'),
+    hex: "0x"+Buffer.from(encoded).toString('hex'),
     body: Buffer.from(txRaw.bodyBytes).toString('base64'),
     authInfoBytes: Buffer.from(txRaw.authInfoBytes).toString('base64'),
     signatures: txRaw.signatures.map((x) => Buffer.from(x).toString('base64'))
   }
+  // console.log('output: ', JSON.stringify(output))
   return output
 }
 
@@ -90,7 +108,7 @@ const scrubCoin = (x: Coin) => {
 
   return coin(x.amount, x.denom)
 }
-const scrubCoins = (x: Coin[]) => x.map(scrubCoin)
+const scrubCoins = (x: Coin[]) => x.filter(c => c.amount && c.amount !== "0").map(scrubCoin)
 
 type Route = { poolId: unknown; tokenOutDenom: unknown }
 const scrubRoute = (x: Route) => {
@@ -104,7 +122,7 @@ const scrubRoute = (x: Route) => {
 }
 const scrubRoutes = (x: Route[]) => x.map(scrubRoute)
 
-function parse_legacy_tx_format(jsonTx: any) {
+function parse_legacy_tx_format(jsonTx: any): ConvertedMsg {
   if (jsonTx.msg.length !== 1) throw new Error('multiple msgs not supported!')
 
   return {
@@ -118,9 +136,80 @@ function parse_legacy_tx_format(jsonTx: any) {
 }
 
 type LegacyMsg = { type: string; value: any }
-function convertLegacyMsg(msg: LegacyMsg) {
+type ConvertedMsg = {
+  from: string
+  msg: {
+    typeUrl: string,
+    value: any
+  }
+  memo?: string
+  fee?: {
+    gas: string
+    amount: Coin[]
+    gas_limit?: string
+  }
+}
+
+function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
   // switch for each tx type supported
   switch (msg.type) {
+    case 'thorchain/MsgSend':
+      if (!msg.value.from_address) throw new Error('Missing from_address in msg')
+      if (!msg.value.to_address) throw new Error('Missing to_address in msg')
+
+      return {
+        from: msg.value.from_address,
+        msg: {
+          typeUrl: '/types.MsgSend',
+          value: {
+            fromAddress: toAccAddress(msg.value.from_address),
+            toAddress: toAccAddress(msg.value.to_address),
+            amount: scrubCoins(msg.value.amount)
+          }
+        },
+    }
+    case 'thorchain/MsgDeposit':
+      if (msg.value.coins?.length !== 1) {
+        throw new Error(`expected 1 input coin got ${msg.value.coins?.length}`)
+      }
+      // console.info('MsgDeposit IN: ', JSON.stringify(msg))
+      const inCoin = msg.value.coins[0]
+      const parts = inCoin.asset.split(".")
+      if (parts.length < 1) {
+        throw new Error(`expected 1 or 2 parts to asset got ${parts.length}`)
+      }
+
+      var chain: string
+      var symbol: string
+      if (parts.length > 1) {
+        [chain, symbol] = parts
+      } else {
+        [symbol] = parts
+        chain = "THOR"
+      }
+    
+      const [ticker] = symbol.split('-')
+      return {
+        from: msg.value.signer,
+        msg: {
+          typeUrl: '/types.MsgDeposit',
+          value: {
+            coins: [
+              {
+                asset: {
+                  chain: chain,
+                  symbol: symbol,
+                  ticker: ticker,
+                  synth: false
+                },
+                amount: inCoin.amount
+              }
+            ],
+            memo: msg.value.memo,
+            signer: toAccAddress(msg.value.signer)
+          }
+        }
+      }
     case 'cosmos-sdk/MsgSend':
       if (!msg.value.from_address) throw new Error('Missing from_address in msg')
       if (!msg.value.to_address) throw new Error('Missing to_address in msg')

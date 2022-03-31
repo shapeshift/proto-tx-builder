@@ -1,0 +1,27 @@
+{
+  "chain_id": "thorchain-mainnet-v1",
+  "account_number": "2722",
+  "sequence": "11",
+  "msg": [
+    {
+      "type": "thorchain/MsgSend",
+      "value": {
+        "from_address": "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az",
+        "to_address": "thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms",
+        "amount": [
+          {
+            "denom": "rune",
+            "amount": "123456"
+          }
+        ]
+      }
+    }
+  ],
+  "fee": {
+    "amount": [],
+    "gas": "1000000"
+  },
+  "signatures": [],
+  "memo": "roonthruwt",
+  "timeout_height": "0"
+}
