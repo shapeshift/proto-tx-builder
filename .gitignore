@@ -5,6 +5,7 @@
 !/.github
 !/.github/**
 !/CODEOWNERS
+!/gen.sh
 !/osmosis-frontend
 !/package.json
 !/proto
