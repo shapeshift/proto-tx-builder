@@ -5,10 +5,15 @@
 !/.github
 !/.github/**
 !/CODEOWNERS
+!/gen.sh
 !/osmosis-frontend
 !/package.json
+!/proto
+!/proto/**
 !/README.md
 !/src
 !/src/**
+!/third_party
+!/third_party/**
 !/tsconfig.json
 !/yarn.lock
