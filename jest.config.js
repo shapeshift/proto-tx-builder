@@ -4,6 +4,6 @@ module.exports = {
   },
   testEnvironment: 'node',
   testRegex: '/*/.*\\.(test|spec)?\\.(ts|tsx|js)$',
-  testPathIgnorePatterns: ['node_modules', 'dist', 'osmosis-frontend'],
+  testPathIgnorePatterns: ['deps', 'dist', 'node_modules'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']
 }

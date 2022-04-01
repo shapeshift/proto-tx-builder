@@ -1,10 +1,7 @@
 *
-!/dist
+!/dist/
 !/dist/**
-!/osmosis-frontend
-!/osmosis-frontend/src
-!/osmosis-frontend/src/proto
-!/osmosis-frontend/src/proto/generated
-!/osmosis-frontend/src/proto/generated/**
+!/proto/
+!/proto/**
 !/package.json
 !/yarn.lock
