@@ -10,6 +10,7 @@
 !/package.json
 !/proto
 !/proto/**
+!/README.md
 !/src
 !/src/**
 !/third_party
