@@ -16,7 +16,6 @@ export async function sign(
   chainId: string
 ): Promise<{
   serialized: string
-  hex: string
   body: string
   authInfoBytes: string
   signatures: string[]
@@ -93,7 +92,6 @@ export async function sign(
   const encoded = TxRaw.encode(txRaw).finish()
   const output = {
     serialized: Buffer.from(encoded).toString('base64'),
-    hex: "0x"+Buffer.from(encoded).toString('hex'),
     body: Buffer.from(txRaw.bodyBytes).toString('base64'),
     authInfoBytes: Buffer.from(txRaw.authInfoBytes).toString('base64'),
     signatures: txRaw.signatures.map((x) => Buffer.from(x).toString('base64'))

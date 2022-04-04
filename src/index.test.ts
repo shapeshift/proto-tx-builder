@@ -85,11 +85,6 @@ describe('signs Tendermint transactions', () => {
       console.info('result: ', JSON.stringify(result))
 
       expect(result.serialized).toBe(referenceTxSigned.serialized)
-      
-      // re-gen the other signed reference txs and remove this if condition
-      if (txAsset === "thorchain") {
-        expect(result.hex).toBe(referenceTxSigned.hex)
-      }
       expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0])
     })
   }
