@@ -1,43 +1,129 @@
-import { Coin, coin } from '@cosmjs/proto-signing'
+import {
+  Array,
+  Literal,
+  PairCase,
+  Record,
+  Runtype,
+  Static,
+  String,
+  Union,
+  when,
+} from "runtypes";
 
-export function scrubCoin(x: Coin) {
-  if (!x.amount) throw new Error('missing coin amount')
-  if (!x.denom) throw new Error('missing coin denom')
+export const Coin = Record({
+  denom: String,
+  amount: String,
+});
+export type Coin = Static<typeof Coin>;
 
-  return coin(x.amount, x.denom)
-}
-export function scrubCoins(x: Coin[]) {
-  return x.filter(c => c.amount).map(scrubCoin)
-}
+export const StdFee = Record({
+  amount: Array(Coin),
+  gas: String,
+});
+export type StdFee = Static<typeof StdFee>;
 
-export type Route = { poolId: unknown; tokenOutDenom: unknown }
-export function scrubRoute(x: Route) {
-  if (!x.poolId) throw new Error('missing route poolId')
-  if (!x.tokenOutDenom) throw new Error('missing route tokenOutDenom')
-
-  return {
-    poolId: x.poolId,
-    tokenOutDenom: x.tokenOutDenom
-  }
-}
-export function scrubRoutes(x: Route[]) {
-  return x.map(scrubRoute)
-}
-
-/**
- * Parses THORChain asset notation.
- * Ref: https://gitlab.com/thorchain/thornode/-/blob/fdbbb25ecb8245bb76a4d5b976e31c0f3e1dd1e0/common/asset.go#L40-75
- * Ref: https://regexr.com/6il5h
- */
-export function parseThorchainAsset(x: string) {
-  const groups = /^(?:(?<chain>[A-Z]{3,10})(?<synthIfSlash>[/.]))?(?<symbol>(?<ticker>[A-Z0-9._]{1,13})(?:-(?<id>[A-Z0-9-._]*))?)$/.exec(x.toUpperCase())?.groups
-  if (!groups) throw new Error(`Invalid THORChain asset: ${x}`)
-  return {
-    chain: groups.chain ?? 'THOR',
-    symbol: groups.symbol,
-    ticker: groups.ticker,
-    // This must return undefined rather than false to ensure the field is omitted from the Asset's protobuf encoding.
-    synth: groups.synthIfSlash === '/' ? true as const : undefined,
-  }
+export function assert<T extends Runtype>(
+  rt: T,
+  x: unknown
+): asserts x is Static<T> {
+  rt.assert(x);
 }
 
+export function asTuple<T extends [any, ...any[]]>(x: T): T {
+  return x;
+}
+
+export type RuntypesOfMatcherList<
+  A extends [PairCase<any, any>, ...PairCase<any, any>[]]
+> = {
+  [key in keyof A]: A[key] extends PairCase<infer RT, any> ? RT : unknown;
+};
+
+export function runtypesOfMatcherList<
+  T extends [PairCase<any, any>, ...PairCase<any, any>[]]
+>(x: T): RuntypesOfMatcherList<T> {
+  return x.map((y) => y[0]) as RuntypesOfMatcherList<T>;
+}
+
+export function legacyMsgRuntype<T extends string, U extends Runtype>(
+  type: T,
+  valueRuntype: U
+) {
+  return Record({
+    type: Literal(type),
+    value: valueRuntype,
+  });
+}
+
+export function legacyMsgMatcher<
+  T extends string,
+  U extends Runtype,
+  V extends string,
+  W extends Runtype
+>(
+  legacyType: T,
+  legacyValueRuntype: U,
+  nativeTypeUrl: V,
+  nativeValueRuntype: W,
+  toFrom: (x: Static<U>) => string,
+  toMsg: (x: Static<U>) => Static<W>
+) {
+  return when(legacyMsgRuntype(legacyType, legacyValueRuntype), (x) => ({
+    from: toFrom((x as any).value),
+    msg: {
+      typeUrl: nativeTypeUrl,
+      value: nativeValueRuntype.check(toMsg((x as any).value)),
+    },
+  }));
+}
+
+export function legacyMsgSimpleMatcher<
+  T extends string,
+  U extends string,
+  V extends Runtype
+>(
+  legacyType: T,
+  nativeTypeUrl: U,
+  valueRuntype: V,
+  toSender: (x: Static<V>) => string | null | undefined
+) {
+  return when(legacyMsgRuntype(legacyType, valueRuntype), (x: any) => {
+    const sender = toSender(x.value);
+    if (!sender) {
+      throw new Error(`Sender missing from ${x.type} message`);
+    }
+    return {
+      from: sender,
+      msg: {
+        typeUrl: nativeTypeUrl,
+        value: x.value,
+      },
+    };
+  });
+}
+
+export function nativeMsgRuntype<T extends string, U extends Runtype>(
+  typeUrl: T,
+  valueRuntype: U
+) {
+  return Record({
+    typeUrl: Literal(typeUrl),
+    value: valueRuntype,
+  });
+}
+
+export function nativeMsgMatcher<T extends string, U extends Runtype>(
+  typeUrl: T,
+  valueRuntype: U
+) {
+  return when(nativeMsgRuntype(typeUrl, valueRuntype), (x) => x);
+}
+
+export function fieldOfUnionOfRecords<
+  T extends Union<[Record<any, any>, ...Record<any, any>[]]>,
+  U extends keyof Static<T>
+>(type: T, fieldName: U): Runtype<Static<T>[U]> {
+  return Union(
+    ...(type.alternatives.map((z) => z.fields[fieldName]) as any)
+  ) as Runtype<Static<T>[U]>;
+}

@@ -10,6 +10,7 @@
 !/generate_proto.sh
 !/package.json
 !/README.md
+!/runtyping.yml
 !/src/
 !/src/**
 !/tsconfig.json

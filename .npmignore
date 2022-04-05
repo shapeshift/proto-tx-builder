@@ -2,6 +2,7 @@
 !/dist/
 !/dist/**
 !/proto/
-!/proto/**
+!/proto/generated.d.ts
+!/proto/generated.js
 !/package.json
 !/yarn.lock

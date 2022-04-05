@@ -2,12 +2,14 @@ import type { OfflineDirectSigner } from '@cosmjs/proto-signing'
 import {
   SigningStargateClient,
 } from '@cosmjs/stargate'
+import { Array, Record, Static, String, Unknown } from 'runtypes'
 
 import { getCodecs, getRegistry } from './codecs'
-import { parseLegacyTxFormat } from './parse'
+import { TxBase, parseTx } from './parse'
+import { assert } from './parse/utils'
 
 export async function sign(
-  jsonTx: any,
+  jsonTx: TxBase,
   signer: OfflineDirectSigner,
   sequence: string,
   accountNumber: string,
@@ -18,11 +20,10 @@ export async function sign(
   authInfoBytes: string
   signatures: string[]
 }> {
-  const convertedMsg = parseLegacyTxFormat(jsonTx)
-  const { msg, from, fee, memo } = convertedMsg
+  const { from, msgs, fee, memo } = parseTx(jsonTx)
 
   const clientOffline = await SigningStargateClient.offline(signer, { registry: getRegistry() })
-  const txRaw = await clientOffline.sign(from, [msg], fee, memo || '', {
+  const txRaw = await clientOffline.sign(from, msgs, fee, memo || '', {
     accountNumber: Number(accountNumber),
     sequence: Number(sequence),
     chainId

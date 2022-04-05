@@ -1,15 +1,18 @@
-import { convertLegacyMsg } from './legacy'
-import { scrubCoins } from './utils'
+import { match, Static, Union, Unknown, when } from "runtypes";
+import { LegacyTxBase, parseLegacyTx } from "./legacy";
+import { NativeTxBase, parseNativeTx } from "./native";
 
-export function parseLegacyTxFormat(jsonTx: any) {
-  if (jsonTx.msg.length !== 1) throw new Error('multiple msgs not supported!')
+export const TxBase = Union(LegacyTxBase, NativeTxBase);
+export type TxBase = Static<typeof TxBase>;
 
-  return {
-    ...convertLegacyMsg(jsonTx.msg[0]),
-    fee: {
-      amount: scrubCoins(jsonTx.fee.amount),
-      gas: jsonTx.fee.gas
-    },
-    memo: jsonTx.memo
-  }
+export function parseTx(tx: TxBase) {
+  return match(
+    when(LegacyTxBase, parseLegacyTx),
+    when(NativeTxBase, parseNativeTx),
+    when(Unknown, (x) => {
+      throw new TypeError(
+        `Unrecognised transaction type! tx = ${JSON.stringify(x)}`
+      );
+    })
+  )(tx);
 }

@@ -1,0 +1,18 @@
+targetFile: proto/runtypes.ts
+sourceTypes:
+  file: proto/generated.d.ts
+  type:
+    - cosmos.bank.v1beta1.IMsgSend
+    - cosmos.bank.v1beta1.IMsgMultiSend
+    - cosmos.staking.v1beta1.IMsgDelegate
+    - cosmos.staking.v1beta1.IMsgUndelegate
+    - cosmos.staking.v1beta1.IMsgBeginRedelegate
+    - cosmos.distribution.v1beta1.IMsgWithdrawDelegatorReward
+    - ibc.applications.transfer.v1.IMsgTransfer
+    - osmosis.gamm.v1beta1.IMsgSwapExactAmountIn
+    - osmosis.gamm.v1beta1.IMsgJoinPool
+    - osmosis.gamm.v1beta1.IMsgExitPool
+    - osmosis.lockup.IMsgLockTokens
+    - osmosis.lockup.IMsgBeginUnlockingAll
+    - types.IMsgSend
+    - types.IMsgDeposit

@@ -60,3 +60,7 @@ pbts -o ./proto/generated.d.ts ./proto/generated.js
 # Minify generated codecs
 uglifyjs ./proto/generated.js -c -m -o ./proto/generated.min.js
 mv ./proto/generated.min.js ./proto/generated.js
+
+# Generate runtypes
+runtyping
+prettier -w proto/runtypes.ts

@@ -9,8 +9,8 @@
     "type": "git",
     "url": "https://github.com/shapeshift/proto-tx-builder.git"
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "scripts": {
     "test": "yarn run build && jest --verbose --silent=true",
     "test-debug": "yarn run build && jest --verbose",
@@ -27,7 +27,8 @@
     "glob": "^7.2.0",
     "jest": "^26.6.3",
     "jsdoc": "^3.6.3",
-    "prettier": "^2.5.1",
+    "prettier": "^2.6.2",
+    "runtyping": "^4.5.1",
     "semver": "^7.1.2",
     "ts-jest": "^26.5.5",
     "typescript": "^4.2.4",
@@ -38,6 +39,8 @@
     "@cosmjs/stargate": "^0.28.0",
     "bn.js": "^5.2.1",
     "long": "^4.0.0",
-    "protobufjs": "~6.11.2"
+    "protobufjs": "~6.11.2",
+    "runtypes": "^6.5.1",
+    "type-assertions": "^1.1.0"
   }
 }
