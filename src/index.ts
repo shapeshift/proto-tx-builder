@@ -1,4 +1,4 @@
-import { Coin, coin, Registry, OfflineDirectSigner } from '@cosmjs/proto-signing'
+import { Coin, coin, Registry, OfflineSigner } from '@cosmjs/proto-signing'
 import {
   SigningStargateClient,
   defaultRegistryTypes as defaultStargateTypes
@@ -10,7 +10,7 @@ import * as codecs from './protobuf'
 
 export async function sign(
   jsonTx: any,
-  signer: OfflineDirectSigner,
+  signer: OfflineSigner,
   sequence: string,
   accountNumber: string,
   chainId: string
@@ -270,7 +270,7 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
           }
         }
       }
-    case 'cosmos-sdk/MsgWithdrawDelegatorReward':
+    case 'cosmos-sdk/MsgWithdrawDelegationReward':
       if (!msg.value.delegator_address) throw new Error('Missing delegator_address in msg')
       if (!msg.value.validator_address) throw new Error('Missing validator_address in msg')
 
@@ -281,7 +281,7 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
           value: {
             delegatorAddress: msg.value.delegator_address,
             validatorAddress: msg.value.validator_address,
-            amount: scrubCoin(msg.value.amount)
+            amount: msg.value.amount ? scrubCoin(msg.value.amount) : undefined
           }
         }
       }
@@ -306,7 +306,8 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
             timeoutHeight: {
               revisionHeight: msg.value.timeout_height.revision_height,
               revisionNumber: msg.value.timeout_height.revision_number
-            }
+            },
+            timeoutTimestamp: "0"
           }
         }
       }
