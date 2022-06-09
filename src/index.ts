@@ -6,6 +6,8 @@ import {
 import { toAccAddress } from '@cosmjs/stargate/build/queryclient/utils'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
+import BN from 'bn.js'
+
 import * as codecs from './protobuf'
 
 export async function sign(
@@ -332,7 +334,7 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
     case 'osmosis/gamm/join-pool':
       if (!msg.value.sender) throw new Error('Missing sender in msg')
       if (!msg.value.poolId) throw new Error('Missing poolId in msg')
-      if (!msg.value.shareOutAmount) throw new Error('Missing poolId in msg')
+      if (!msg.value.shareOutAmount) throw new Error('Missing shareOutAmount in msg')
       if (msg.value.tokenInMaxs.length !== 2) throw new Error('bad tokenInMaxs length')
 
       return {
@@ -350,7 +352,7 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
     case 'osmosis/gamm/exit-pool':
       if (!msg.value.sender) throw new Error('Missing sender in msg')
       if (!msg.value.poolId) throw new Error('Missing poolId in msg')
-      if (!msg.value.shareOutAmount) throw new Error('Missing poolId in msg')
+      if (!msg.value.shareInAmount) throw new Error('Missing shareInAmount in msg')
       if (msg.value.tokenOutMins.length !== 2) throw new Error('bad tokenOutMins length')
 
       return {
@@ -360,14 +362,19 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
           value: {
             sender: msg.value.sender,
             poolId: msg.value.poolId,
-            shareInAmount: msg.value.shareOutAmount,
+            shareInAmount: msg.value.shareInAmount,
             tokenOutMins: scrubCoins(msg.value.tokenOutMins)
           }
         }
       }
-    case 'osmosis/lockup/lock-tokens':
+    case 'osmosis/lockup/lock-tokens': {
       if (!msg.value.owner) throw new Error('Missing owner in msg')
       if (!msg.value.duration) throw new Error('Missing duration in msg')
+
+      const duration = new BN(msg.value.duration)
+      const nanosPerSecond = new BN("1000000000")
+      const seconds = duration.div(nanosPerSecond).toString()
+      const nanos = duration.umod(nanosPerSecond).toString()
 
       return {
         from: msg.value.owner,
@@ -375,11 +382,12 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
           typeUrl: '/osmosis.lockup.MsgLockTokens',
           value: {
             owner: msg.value.owner,
-            duration: msg.value.poolId,
+            duration: { seconds, nanos },
             coins: scrubCoins(msg.value.coins)
           }
         }
       }
+    }
     case 'osmosis/lockup/begin-unlock-period-lock':
       if (!msg.value.owner) throw new Error('Missing owner in msg')
 

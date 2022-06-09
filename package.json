@@ -19,6 +19,7 @@
     "prepublish": "npm run build"
   },
   "devDependencies": {
+    "@types/bn.js": "^5.1.0",
     "@types/glob": "^7.2.0",
     "@types/google-protobuf": "^3.15.2",
     "@types/jest": "^26.0.22",
@@ -34,6 +35,7 @@
     "@cosmjs/proto-signing": "^0.28.0",
     "@cosmjs/stargate": "^0.28.0",
     "@cosmjs/tendermint-rpc": "^0.28.0",
+    "bn.js": "^5.2.1",
     "cosmjs-types": "^0.4.1",
     "google-protobuf": "^3.17.0",
     "long": "^4.0.0"
