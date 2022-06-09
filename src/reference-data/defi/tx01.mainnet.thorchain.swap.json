@@ -2,7 +2,6 @@
   "chain_id": "thorchain",
   "account_number": 12345,
   "sequence": 1,
-  
   "msg": [
     {
       "type": "thorchain/MsgDeposit",
