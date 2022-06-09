@@ -1,4 +1,127 @@
 {
-  "txid": "8C499940B0104B60C3D722E3CBFEE85424D210679B754CD29F8902A8B30FC813",
-  "link": "https://www.mintscan.io/osmosis/txs/8C499940B0104B60C3D722E3CBFEE85424D210679B754CD29F8902A8B30FC813"
+  "height": "1940951",
+  "txhash": "8C499940B0104B60C3D722E3CBFEE85424D210679B754CD29F8902A8B30FC813",
+  "codespace": "",
+  "code": 0,
+  "data": "0A0D0A0B6C6F636B5F746F6B656E73",
+  "raw_log": "[{\"events\":[{\"type\":\"lock_tokens\",\"attributes\":[{\"key\":\"period_lock_id\",\"value\":\"382614\"},{\"key\":\"owner\",\"value\":\"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq\"},{\"key\":\"amount\",\"value\":\"300000000000000000gamm/pool/1\"},{\"key\":\"duration\",\"value\":\"24h0m0.000003039s\"},{\"key\":\"unlock_time\",\"value\":\"0001-01-01 00:00:00 +0000 UTC\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"lock_tokens\"},{\"key\":\"sender\",\"value\":\"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"osmo1njty28rqtpw6n59sjj4esw76enp4mg6g7cwrhc\"},{\"key\":\"sender\",\"value\":\"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq\"},{\"key\":\"amount\",\"value\":\"300000000000000000gamm/pool/1\"}]}]}]",
+  "logs": [
+    {
+      "msg_index": 0,
+      "log": "",
+      "events": [
+        {
+          "type": "lock_tokens",
+          "attributes": [
+            {
+              "key": "period_lock_id",
+              "value": "382614"
+            },
+            {
+              "key": "owner",
+              "value": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq"
+            },
+            {
+              "key": "amount",
+              "value": "300000000000000000gamm/pool/1"
+            },
+            {
+              "key": "duration",
+              "value": "24h0m0.000003039s"
+            },
+            {
+              "key": "unlock_time",
+              "value": "0001-01-01 00:00:00 +0000 UTC"
+            }
+          ]
+        },
+        {
+          "type": "message",
+          "attributes": [
+            {
+              "key": "action",
+              "value": "lock_tokens"
+            },
+            {
+              "key": "sender",
+              "value": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq"
+            }
+          ]
+        },
+        {
+          "type": "transfer",
+          "attributes": [
+            {
+              "key": "recipient",
+              "value": "osmo1njty28rqtpw6n59sjj4esw76enp4mg6g7cwrhc"
+            },
+            {
+              "key": "sender",
+              "value": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq"
+            },
+            {
+              "key": "amount",
+              "value": "300000000000000000gamm/pool/1"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "info": "",
+  "gas_wanted": "140000",
+  "gas_used": "85345",
+  "tx": {
+    "@type": "/cosmos.tx.v1beta1.Tx",
+    "body": {
+      "messages": [
+        {
+          "@type": "/osmosis.lockup.MsgLockTokens",
+          "owner": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq",
+          "duration": "86400.000003039s",
+          "coins": [
+            {
+              "denom": "gamm/pool/1",
+              "amount": "300000000000000000"
+            }
+          ]
+        }
+      ],
+      "memo": "",
+      "timeout_height": "0",
+      "extension_options": [],
+      "non_critical_extension_options": []
+    },
+    "auth_info": {
+      "signer_infos": [
+        {
+          "public_key": {
+            "@type": "/cosmos.crypto.secp256k1.PubKey",
+            "key": "A77jrzDlOnPzirxaL82sQm17BOtyqOvTsBmS4tIG4krY"
+          },
+          "mode_info": {
+            "single": {
+              "mode": "SIGN_MODE_LEGACY_AMINO_JSON"
+            }
+          },
+          "sequence": "9"
+        }
+      ],
+      "fee": {
+        "amount": [
+          {
+            "denom": "uosmo",
+            "amount": "0"
+          }
+        ],
+        "gas_limit": "140000",
+        "payer": "",
+        "granter": ""
+      }
+    },
+    "signatures": [
+      "NTXakYlhkZG28IOX4WZvXnLLaytSGm6AOJ5ZW3EmPwxiNri+iU4DKigkLwZb2/lzIHAopgjK3qUEE6OT2YR7fw=="
+    ]
+  },
+  "timestamp": "2021-11-10T20:30:19Z"
 }

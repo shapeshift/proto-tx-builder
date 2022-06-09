@@ -1,4 +1,197 @@
 {
-  "txid": "F0F487CB190717D07FE4CD5AF28B2F6302DE3BEBD5138BBFE970C71716D563B5",
-  "link": "https://www.mintscan.io/osmosis/txs/F0F487CB190717D07FE4CD5AF28B2F6302DE3BEBD5138BBFE970C71716D563B5"
+  "height": "3107988",
+  "txhash": "F0F487CB190717D07FE4CD5AF28B2F6302DE3BEBD5138BBFE970C71716D563B5",
+  "codespace": "",
+  "code": 0,
+  "data": "0A2C0A2A2F6F736D6F7369732E67616D6D2E763162657461312E4D7367537761704578616374416D6F756E74496E",
+  "raw_log": "[{\"events\":[{\"type\":\"coin_received\",\"attributes\":[{\"key\":\"receiver\",\"value\":\"osmo1mw0ac6rwlp5r8wapwk3zs6g29h8fcscxqakdzw9emkne6c8wjp9q0t3v8t\"},{\"key\":\"amount\",\"value\":\"65000uosmo\"},{\"key\":\"receiver\",\"value\":\"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq\"},{\"key\":\"amount\",\"value\":\"18647ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2\"}]},{\"type\":\"coin_spent\",\"attributes\":[{\"key\":\"spender\",\"value\":\"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq\"},{\"key\":\"amount\",\"value\":\"65000uosmo\"},{\"key\":\"spender\",\"value\":\"osmo1mw0ac6rwlp5r8wapwk3zs6g29h8fcscxqakdzw9emkne6c8wjp9q0t3v8t\"},{\"key\":\"amount\",\"value\":\"18647ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/osmosis.gamm.v1beta1.MsgSwapExactAmountIn\"},{\"key\":\"sender\",\"value\":\"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq\"},{\"key\":\"sender\",\"value\":\"osmo1mw0ac6rwlp5r8wapwk3zs6g29h8fcscxqakdzw9emkne6c8wjp9q0t3v8t\"},{\"key\":\"module\",\"value\":\"gamm\"},{\"key\":\"sender\",\"value\":\"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq\"}]},{\"type\":\"token_swapped\",\"attributes\":[{\"key\":\"module\",\"value\":\"gamm\"},{\"key\":\"sender\",\"value\":\"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq\"},{\"key\":\"pool_id\",\"value\":\"1\"},{\"key\":\"tokens_in\",\"value\":\"65000uosmo\"},{\"key\":\"tokens_out\",\"value\":\"18647ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"osmo1mw0ac6rwlp5r8wapwk3zs6g29h8fcscxqakdzw9emkne6c8wjp9q0t3v8t\"},{\"key\":\"sender\",\"value\":\"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq\"},{\"key\":\"amount\",\"value\":\"65000uosmo\"},{\"key\":\"recipient\",\"value\":\"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq\"},{\"key\":\"sender\",\"value\":\"osmo1mw0ac6rwlp5r8wapwk3zs6g29h8fcscxqakdzw9emkne6c8wjp9q0t3v8t\"},{\"key\":\"amount\",\"value\":\"18647ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2\"}]}]}]",
+  "logs": [
+    {
+      "msg_index": 0,
+      "log": "",
+      "events": [
+        {
+          "type": "coin_received",
+          "attributes": [
+            {
+              "key": "receiver",
+              "value": "osmo1mw0ac6rwlp5r8wapwk3zs6g29h8fcscxqakdzw9emkne6c8wjp9q0t3v8t"
+            },
+            {
+              "key": "amount",
+              "value": "65000uosmo"
+            },
+            {
+              "key": "receiver",
+              "value": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq"
+            },
+            {
+              "key": "amount",
+              "value": "18647ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+            }
+          ]
+        },
+        {
+          "type": "coin_spent",
+          "attributes": [
+            {
+              "key": "spender",
+              "value": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq"
+            },
+            {
+              "key": "amount",
+              "value": "65000uosmo"
+            },
+            {
+              "key": "spender",
+              "value": "osmo1mw0ac6rwlp5r8wapwk3zs6g29h8fcscxqakdzw9emkne6c8wjp9q0t3v8t"
+            },
+            {
+              "key": "amount",
+              "value": "18647ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+            }
+          ]
+        },
+        {
+          "type": "message",
+          "attributes": [
+            {
+              "key": "action",
+              "value": "/osmosis.gamm.v1beta1.MsgSwapExactAmountIn"
+            },
+            {
+              "key": "sender",
+              "value": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq"
+            },
+            {
+              "key": "sender",
+              "value": "osmo1mw0ac6rwlp5r8wapwk3zs6g29h8fcscxqakdzw9emkne6c8wjp9q0t3v8t"
+            },
+            {
+              "key": "module",
+              "value": "gamm"
+            },
+            {
+              "key": "sender",
+              "value": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq"
+            }
+          ]
+        },
+        {
+          "type": "token_swapped",
+          "attributes": [
+            {
+              "key": "module",
+              "value": "gamm"
+            },
+            {
+              "key": "sender",
+              "value": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq"
+            },
+            {
+              "key": "pool_id",
+              "value": "1"
+            },
+            {
+              "key": "tokens_in",
+              "value": "65000uosmo"
+            },
+            {
+              "key": "tokens_out",
+              "value": "18647ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+            }
+          ]
+        },
+        {
+          "type": "transfer",
+          "attributes": [
+            {
+              "key": "recipient",
+              "value": "osmo1mw0ac6rwlp5r8wapwk3zs6g29h8fcscxqakdzw9emkne6c8wjp9q0t3v8t"
+            },
+            {
+              "key": "sender",
+              "value": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq"
+            },
+            {
+              "key": "amount",
+              "value": "65000uosmo"
+            },
+            {
+              "key": "recipient",
+              "value": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq"
+            },
+            {
+              "key": "sender",
+              "value": "osmo1mw0ac6rwlp5r8wapwk3zs6g29h8fcscxqakdzw9emkne6c8wjp9q0t3v8t"
+            },
+            {
+              "key": "amount",
+              "value": "18647ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "info": "",
+  "gas_wanted": "290000",
+  "gas_used": "99692",
+  "tx": {
+    "@type": "/cosmos.tx.v1beta1.Tx",
+    "body": {
+      "messages": [
+        {
+          "@type": "/osmosis.gamm.v1beta1.MsgSwapExactAmountIn",
+          "sender": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq",
+          "routes": [
+            {
+              "poolId": "1",
+              "tokenOutDenom": "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+            }
+          ],
+          "tokenIn": {
+            "denom": "uosmo",
+            "amount": "65000"
+          },
+          "tokenOutMinAmount": "8204"
+        }
+      ],
+      "memo": "",
+      "timeout_height": "0",
+      "extension_options": [],
+      "non_critical_extension_options": []
+    },
+    "auth_info": {
+      "signer_infos": [
+        {
+          "public_key": {
+            "@type": "/cosmos.crypto.secp256k1.PubKey",
+            "key": "A77jrzDlOnPzirxaL82sQm17BOtyqOvTsBmS4tIG4krY"
+          },
+          "mode_info": {
+            "single": {
+              "mode": "SIGN_MODE_DIRECT"
+            }
+          },
+          "sequence": "40"
+        }
+      ],
+      "fee": {
+        "amount": [
+          {
+            "denom": "uosmo",
+            "amount": "2800"
+          }
+        ],
+        "gas_limit": "290000",
+        "payer": "",
+        "granter": ""
+      }
+    },
+    "signatures": [
+      "Axx9eCMeKX2hoB7bYg0hDdbAyu7x6cnngGq8jLgPTRdmVzIp5S53BMBPgzomNqlKFt2xVUlMNjM4DitWZKprdg=="
+    ]
+  },
+  "timestamp": "2022-02-06T23:11:05Z"
 }
