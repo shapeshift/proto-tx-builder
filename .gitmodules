@@ -1,3 +1,18 @@
-[submodule "osmosis-frontend"]
-	path = osmosis-frontend
-	url = https://github.com/osmosis-labs/osmosis-frontend
+[submodule "deps/osmosis"]
+	path = deps/osmosis
+	url = https://github.com/osmosis-labs/osmosis
+[submodule "deps/thornode"]
+	path = deps/thornode
+	url = https://gitlab.com/thorchain/thornode
+[submodule "deps/tendermint"]
+	path = deps/tendermint
+	url = https://github.com/tendermint/tendermint
+[submodule "deps/cosmos-sdk"]
+	path = deps/cosmos-sdk
+	url = https://github.com/cosmos/cosmos-sdk
+[submodule "deps/protobuf"]
+	path = deps/protobuf
+	url = https://github.com/protocolbuffers/protobuf
+[submodule "deps/ibc-go"]
+	path = deps/ibc-go
+	url = https://github.com/cosmos/ibc-go

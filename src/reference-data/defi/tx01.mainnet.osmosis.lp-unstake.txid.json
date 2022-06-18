@@ -1,4 +1,108 @@
 {
-  "txid": "87FC5C2FCAB545440CB18F9D38019068E95F707EFC8EF58961B9C4BBA01F21C4",
-  "link": "https://www.mintscan.io/cosmos/txs/87FC5C2FCAB545440CB18F9D38019068E95F707EFC8EF58961B9C4BBA01F21C4"
+  "height": "3119080",
+  "txhash": "EB02ABA2287096D594B1587FA8A64B40429CE23AFECF4152DBD23705B1715528",
+  "codespace": "",
+  "code": 0,
+  "data": "0A260A242F6F736D6F7369732E6C6F636B75702E4D7367426567696E556E6C6F636B696E67416C6C",
+  "raw_log": "[{\"events\":[{\"type\":\"begin_unlock\",\"attributes\":[{\"key\":\"period_lock_id\",\"value\":\"382614\"},{\"key\":\"owner\",\"value\":\"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq\"},{\"key\":\"duration\",\"value\":\"24h0m0.000003039s\"},{\"key\":\"unlock_time\",\"value\":\"0001-01-01 00:00:00 +0000 UTC\"}]},{\"type\":\"begin_unlock_all\",\"attributes\":[{\"key\":\"owner\",\"value\":\"osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq\"},{\"key\":\"unlocked_coins\",\"value\":\"300000000000000000gamm/pool/1\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"begin_unlocking_all\"}]}]}]",
+  "logs": [
+    {
+      "msg_index": 0,
+      "log": "",
+      "events": [
+        {
+          "type": "begin_unlock",
+          "attributes": [
+            {
+              "key": "period_lock_id",
+              "value": "382614"
+            },
+            {
+              "key": "owner",
+              "value": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq"
+            },
+            {
+              "key": "duration",
+              "value": "24h0m0.000003039s"
+            },
+            {
+              "key": "unlock_time",
+              "value": "0001-01-01 00:00:00 +0000 UTC"
+            }
+          ]
+        },
+        {
+          "type": "begin_unlock_all",
+          "attributes": [
+            {
+              "key": "owner",
+              "value": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq"
+            },
+            {
+              "key": "unlocked_coins",
+              "value": "300000000000000000gamm/pool/1"
+            }
+          ]
+        },
+        {
+          "type": "message",
+          "attributes": [
+            {
+              "key": "action",
+              "value": "begin_unlocking_all"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "info": "",
+  "gas_wanted": "290000",
+  "gas_used": "81572",
+  "tx": {
+    "@type": "/cosmos.tx.v1beta1.Tx",
+    "body": {
+      "messages": [
+        {
+          "@type": "/osmosis.lockup.MsgBeginUnlockingAll",
+          "owner": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq"
+        }
+      ],
+      "memo": "",
+      "timeout_height": "0",
+      "extension_options": [],
+      "non_critical_extension_options": []
+    },
+    "auth_info": {
+      "signer_infos": [
+        {
+          "public_key": {
+            "@type": "/cosmos.crypto.secp256k1.PubKey",
+            "key": "A77jrzDlOnPzirxaL82sQm17BOtyqOvTsBmS4tIG4krY"
+          },
+          "mode_info": {
+            "single": {
+              "mode": "SIGN_MODE_DIRECT"
+            }
+          },
+          "sequence": "47"
+        }
+      ],
+      "fee": {
+        "amount": [
+          {
+            "denom": "uosmo",
+            "amount": "0"
+          }
+        ],
+        "gas_limit": "290000",
+        "payer": "",
+        "granter": ""
+      }
+    },
+    "signatures": [
+      "rPoUXt/PoTtjUG4kAS6MYWK0wJCqIP3WzqGBdAXiY9ZazKWADPn14YiyfHHa6fjUTrJQNUjMaJ1YDyju5/53sQ=="
+    ]
+  },
+  "timestamp": "2022-02-07T19:17:04Z"
 }

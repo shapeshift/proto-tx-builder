@@ -53,8 +53,9 @@ describe('signs Tendermint transactions', () => {
     const signedJsonPathSegments = /^([^.]+)\.([^.]+)\.([^.]+)\.(.+)\.signed\.json$/.exec(
       signedJsonBasename
     )
-    if (!signedJsonPathSegments)
+    if (!signedJsonPathSegments) {
       throw new Error(`test name doesn't match pattern: ${signedJsonBasename}`)
+    }
 
     const [, txNum, txNet, txAsset, txType] = signedJsonPathSegments
     it(`signs a ${txNet} ${txAsset} reference ${txType.replace(
