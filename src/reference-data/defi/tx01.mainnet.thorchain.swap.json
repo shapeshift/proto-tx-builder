@@ -1,4 +1,5 @@
 {
+  "signerAddress": "thor1ls33ayg26kmltw7jjy55p32ghjna09zp74t4az",
   "chain_id": "thorchain",
   "account_number": 12345,
   "sequence": 1,
