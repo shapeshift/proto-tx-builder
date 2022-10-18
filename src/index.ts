@@ -116,7 +116,7 @@ const scrubCoin = (x: Coin) => {
   return coin(x.amount, x.denom)
 }
 
-const scrubCoins = (x: readonly Coin[]) => x.filter(c => c.amount && c.amount !== "0").map(scrubCoin)
+const scrubCoins = (x: readonly Coin[]) => x.filter(c => c.amount).map(scrubCoin)
 
 type Route = { poolId: unknown; tokenOutDenom: unknown }
 
