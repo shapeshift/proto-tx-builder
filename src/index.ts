@@ -12,6 +12,9 @@ import {
   createIbcAminoConverters,
   createStakingAminoConverters,
 } from '@cosmjs/stargate'
+
+import{ osmosis } from 'osmojs'
+
 import * as amino from '@cosmjs/amino'
 import { createVestingAminoConverters } from '@cosmjs/stargate/build/modules' // not exported from top level, but included in default amino converter types
 import { toAccAddress } from '@cosmjs/stargate/build/queryclient/utils'
@@ -47,6 +50,8 @@ export async function sign(
   authInfoBytes: string
   signatures: string[]
 }> {
+
+
   const myAminoTypes = new AminoTypes({
     ...createAuthzAminoConverters(),
     ...createBankAminoConverters(),
@@ -57,6 +62,8 @@ export async function sign(
     ...createStakingAminoConverters(prefix),
     ...createVestingAminoConverters(),
     ...thorchain.createAminoConverters(),
+    ...osmosis.gamm.v1beta1.AminoConverter,
+    ...osmosis.lockup.AminoConverter
   })
 
   const myRegistry = new Registry(defaultStargateTypes)
