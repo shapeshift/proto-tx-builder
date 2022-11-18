@@ -27,11 +27,11 @@ async function makeReferenceSeedSigner(prefix: string, coinType?: number) {
     {
       hdPaths: [
         [
-          // Slip10RawIndex.hardened(44),
-          // Slip10RawIndex.hardened(coinType),
-          // Slip10RawIndex.hardened(0),
-          // Slip10RawIndex.normal(0),
-          // Slip10RawIndex.normal(0)
+          Slip10RawIndex.hardened(44),
+          Slip10RawIndex.hardened(coinType),
+          Slip10RawIndex.hardened(0),
+          Slip10RawIndex.normal(0),
+          Slip10RawIndex.normal(0)
         ]
       ],
       prefix
