@@ -1,18 +1,11 @@
 import { AminoMsg } from '@cosmjs/amino';
-import { fromBech32, toBech32 } from '@cosmjs/encoding';
 import { AminoConverters } from '@cosmjs/stargate';
-import {
-    MsgDelegate,
-    MsgUndelegate,
-    MsgBeginRedelegate,
-} from '../../proto/generated/osmosis/cosmos/staking/v1beta1/tx';
 import {
     MsgLockTokens,
     MsgBeginUnlockingAll,
     MsgBeginUnlocking,
     MsgExtendLockup,
 } from '../../proto/generated/osmosis/osmosis/lockup/tx';
-import { MsgWithdrawDelegatorReward } from '../../proto/generated/osmosis/cosmos/distribution/v1beta1/tx';
 import {
     MsgExitPool,
     MsgExitSwapExternAmountOut,
@@ -36,49 +29,6 @@ import {
 
 import { Long } from '../../proto/generated/osmosis/helpers';
 import assert from 'assert';
-
-export interface AminoMsgDelegate extends AminoMsg {
-    type: 'cosmos-sdk/MsgDelegate';
-    value: {
-        delegator_address: string;
-        validator_address: string;
-        amount: {
-            denom: string;
-            amount: string;
-        };
-    };
-}
-export interface AminoMsgBeginRedelegate extends AminoMsg {
-    type: 'cosmos-sdk/MsgBeginRedelegate';
-    value: {
-        delegator_address: string;
-        validator_src_address: string;
-        validator_dst_address: string;
-        amount: {
-            denom: string;
-            amount: string;
-        };
-    };
-}
-export interface AminoMsgUndelegate extends AminoMsg {
-    type: 'cosmos-sdk/MsgUndelegate';
-    value: {
-        delegator_address: string;
-        validator_address: string;
-        amount: {
-            denom: string;
-            amount: string;
-        };
-    };
-}
-
-export interface AminoMsgWithdrawDelegatorReward extends AminoMsg {
-    type: 'cosmos-sdk/MsgWithdrawDelegationReward';
-    value: {
-        delegator_address: string;
-        validator_address: string;
-    };
-}
 
 export interface AminoMsgLockTokens extends AminoMsg {
     type: 'osmosis/lockup/lock-tokens';
@@ -125,127 +75,6 @@ export interface AminoMsgExtendLockup extends AminoMsg {
 
 export function createAminoConverters(): AminoConverters {
     return {
-        '/cosmos.staking.v1beta1.MsgDelegate': {
-            aminoType: 'cosmos-sdk/MsgDelegate',
-            toAmino: ({
-                delegatorAddress,
-                validatorAddress,
-                amount,
-            }: MsgDelegate): AminoMsgDelegate['value'] => {
-                assert(amount, 'amount must be provided.');
-                return {
-                    delegator_address: delegatorAddress,
-                    validator_address: validatorAddress,
-                    amount: {
-                        denom: amount.denom,
-                        amount: Long.fromValue(amount.amount).toString(),
-                    },
-                };
-            },
-            fromAmino: ({
-                delegator_address,
-                validator_address,
-                amount,
-            }: AminoMsgDelegate['value']): MsgDelegate => {
-                return {
-                    delegatorAddress: delegator_address,
-                    validatorAddress: validator_address,
-                    amount: {
-                        denom: amount.denom,
-                        amount: amount.amount,
-                    },
-                };
-            },
-        },
-        '/cosmos.staking.v1beta1.MsgBeginRedelegate': {
-            aminoType: 'cosmos-sdk/MsgBeginRedelegate',
-            toAmino: ({
-                delegatorAddress,
-                validatorSrcAddress,
-                validatorDstAddress,
-                amount,
-            }: MsgBeginRedelegate): AminoMsgBeginRedelegate['value'] => {
-                assert(amount, 'amount must be provided.');
-                return {
-                    delegator_address: delegatorAddress,
-                    validator_src_address: validatorSrcAddress,
-                    validator_dst_address: validatorDstAddress,
-                    amount: {
-                        denom: amount.denom,
-                        amount: Long.fromValue(amount.amount).toString(),
-                    },
-                };
-            },
-            fromAmino: ({
-                delegator_address,
-                validator_src_address,
-                validator_dst_address,
-                amount,
-            }: AminoMsgBeginRedelegate['value']): MsgBeginRedelegate => {
-                return {
-                    delegatorAddress: delegator_address,
-                    validatorSrcAddress: validator_src_address,
-                    validatorDstAddress: validator_dst_address,
-                    amount: {
-                        denom: amount.denom,
-                        amount: amount.amount,
-                    },
-                };
-            },
-        },
-        '/cosmos.staking.v1beta1.MsgUndelegate': {
-            aminoType: 'cosmos-sdk/MsgUndelegate',
-            toAmino: ({
-                delegatorAddress,
-                validatorAddress,
-                amount,
-            }: MsgUndelegate): AminoMsgUndelegate['value'] => {
-                assert(amount, 'amount must be provided.');
-                return {
-                    delegator_address: delegatorAddress,
-                    validator_address: validatorAddress,
-                    amount: {
-                        denom: amount.denom,
-                        amount: Long.fromValue(amount.amount).toString(),
-                    },
-                };
-            },
-            fromAmino: ({
-                delegator_address,
-                validator_address,
-                amount,
-            }: AminoMsgUndelegate['value']): MsgUndelegate => {
-                return {
-                    delegatorAddress: delegator_address,
-                    validatorAddress: validator_address,
-                    amount: {
-                        denom: amount.denom,
-                        amount: amount.amount,
-                    },
-                };
-            },
-        },
-        '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward': {
-            aminoType: 'cosmos-sdk/MsgWithdrawDelegationReward',
-            toAmino: ({
-                delegatorAddress,
-                validatorAddress,
-            }: MsgWithdrawDelegatorReward): AminoMsgWithdrawDelegatorReward['value'] => {
-                return {
-                    delegator_address: delegatorAddress,
-                    validator_address: validatorAddress,
-                };
-            },
-            fromAmino: ({
-                delegator_address,
-                validator_address,
-            }: AminoMsgWithdrawDelegatorReward['value']): MsgWithdrawDelegatorReward => {
-                return {
-                    delegatorAddress: delegator_address,
-                    validatorAddress: validator_address,
-                };
-            },
-        },
         '/osmosis.gamm.v1beta1.MsgJoinPool': {
             aminoType: 'osmosis/gamm/join-pool',
             toAmino: ({
