@@ -1,6 +1,6 @@
 {
-  "name": "@shapeshiftoss/proto-tx-builder",
-  "version": "0.5.0",
+  "name": "@pastaghost/proto-tx-builder",
+  "version": "0.5.4",
   "description": "Builds and signs new-style protobuf SIGN_MODE_DIRECT Cosmos SDK transactions",
   "author": "ShapeShift DAO",
   "license": "MIT",
@@ -35,12 +35,14 @@
   },
   "dependencies": {
     "@cosmjs/amino": "^0.29.4",
+    "@cosmjs/crypto": "0.28.13",
     "@cosmjs/encoding": "^0.28.13",
     "@cosmjs/proto-signing": "^0.28.13",
     "@cosmjs/stargate": "^0.28.13",
     "@cosmjs/tendermint-rpc": "^0.28.13",
     "@osmonauts/lcd": "^0.8.0",
     "cosmjs-types": "^0.5.1",
-    "google-protobuf": "^3.17.0"
+    "google-protobuf": "^3.17.0",
+    "osmojs": "^0.36.0"
   }
 }

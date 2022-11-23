@@ -12,17 +12,6 @@ export interface Coin {
   denom: string;
   amount: string;
 }
-/**
- * Coin defines a token with a denomination and an amount.
- * 
- * NOTE: The amount field is an Int which implements the custom method
- * signatures required by gogoproto.
- */
-
- export interface CoinSDKType {
-  denom: string;
-  amount: string;
-}
 
 /**
  * DecCoin defines a token with a denomination and a decimal amount.
