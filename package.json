@@ -19,7 +19,7 @@
     "prepublish": "npm run build"
   },
   "devDependencies": {
-    "@types/bn.js": "^5.1.0",
+    "@types/bn.js": "^5.1.1",
     "@types/glob": "^7.2.0",
     "@types/google-protobuf": "^3.15.2",
     "@types/jest": "^26.0.22",
