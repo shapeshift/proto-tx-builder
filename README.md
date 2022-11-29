@@ -1,8 +1,12 @@
 # proto-tx-builder
-Constructs and signs protobuf encoded cosmos-sdk 
+
+Constructs and signs protobuf encoded cosmos-sdk
+
 ## Getting started
 
 ```bash
+# Clone submodules
+git submodule update --init --recursive
 # Install the required dependencies
 yarn
 ```
@@ -22,18 +26,19 @@ yarn test
 ```
 
 ## TS Proto generation
+
 cosmos-sdk uses [protocol buffers](https://developers.google.com/protocol-buffers) to encode txs and other communication between nodes and clients as well as other nodes. proto-tx-builder leverages the protobuf definitions to generate the TypeScript implementation of the custom protobufs required to interact with a given chain.
 
-- place .proto files for the cosmos-sdk chain in `./proto` and `./third_party/proto` directories
-- remove existing generated files:
+-   place .proto files for the cosmos-sdk chain in `./proto` and `./third_party/proto` directories
+-   remove existing generated files:
     ```bash
     rm -rf ./proto/generated/*
     ```
-- execute the generation script:
+-   execute the generation script:
     ```base
     ./gen.sh
     ```
-- commit the generated content along with your changes
+-   commit the generated content along with your changes
 
 ## Contributing
 
