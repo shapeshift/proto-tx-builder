@@ -4,12 +4,7 @@
   "chain_id": "cosmoshub-4",
   "sequence": "20",
   "fee": {
-    "amount": [
-      {
-        "denom": "uatom",
-        "amount": "0"
-      }
-    ],
+    "amount": [],
     "gas": "250000"
   },
   "msg": [

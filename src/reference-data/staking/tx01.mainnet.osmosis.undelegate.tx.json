@@ -1,0 +1,63 @@
+{
+  "height": "3069417",
+  "txhash": "FC23082BD79EBD6163C89E099D5FD9696A1AE7A668CE4DA2EF9AD7EAAA0C0EA7",
+  "codespace": "sdk",
+  "code": 18,
+  "data": "",
+  "raw_log": "failed to execute message; message index: 0: invalid shares amount: invalid request",
+  "logs": [],
+  "info": "",
+  "gas_wanted": "250000",
+  "gas_used": "44348",
+  "tx": {
+    "@type": "/cosmos.tx.v1beta1.Tx",
+    "body": {
+      "messages": [
+        {
+          "@type": "/cosmos.staking.v1beta1.MsgUndelegate",
+          "delegator_address": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq",
+          "validator_address": "osmovaloper1clpqr4nrk4khgkxj78fcwwh6dl3uw4ep88n0y4",
+          "amount": {
+            "denom": "uosmo",
+            "amount": "3000"
+          }
+        }
+      ],
+      "memo": "",
+      "timeout_height": "0",
+      "extension_options": [],
+      "non_critical_extension_options": []
+    },
+    "auth_info": {
+      "signer_infos": [
+        {
+          "public_key": {
+            "@type": "/cosmos.crypto.secp256k1.PubKey",
+            "key": "A77jrzDlOnPzirxaL82sQm17BOtyqOvTsBmS4tIG4krY"
+          },
+          "mode_info": {
+            "single": {
+              "mode": "SIGN_MODE_DIRECT"
+            }
+          },
+          "sequence": "39"
+        }
+      ],
+      "fee": {
+        "amount": [
+          {
+            "denom": "uosmo",
+            "amount": "0"
+          }
+        ],
+        "gas_limit": "250000",
+        "payer": "",
+        "granter": ""
+      }
+    },
+    "signatures": [
+      "TzfffYVGngAhGuvmFMVSDQmI/htXFVXr89BXdiweFpR+1buB5sD4STGtKkZfDu4urVCFyxvvssKnQrwOMnr8FA=="
+    ]
+  },
+  "timestamp": "2022-02-03T23:59:40Z"
+}
