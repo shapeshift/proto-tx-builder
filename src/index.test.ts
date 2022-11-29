@@ -16,7 +16,7 @@ const prefixes = {
 } as const
 
 // TODO - combine this with prefixes as a chain config object
-const coinTypes: Record<string, number> = {cosmos: 118,osmosis: 118, thorchain: 931}
+const coinTypes: Record<string, number> = { cosmos: 118, osmosis: 118, thorchain: 931 }
 const defaultCoinType = coinTypes.cosmos
 
 // TODO - options argument with acceess to full path, or change prefixes to a general config obj per chain
@@ -76,13 +76,15 @@ describe('signs Tendermint transactions', () => {
       expect(referenceTxSigned).toBeTruthy()
 
       const result = await sign(
+        referenceTx.signerAddress,
         referenceTx,
         signer,
-        referenceTx.sequence,
-        referenceTx.account_number,
-        referenceTx.chain_id
+        {
+          sequence: referenceTx.sequence,
+          accountNumber: referenceTx.account_number,
+          chainId: referenceTx.chain_id
+        }
       )
-      console.info('result: ', JSON.stringify(result))
 
       expect(result.serialized).toBe(referenceTxSigned.serialized)
       expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0])

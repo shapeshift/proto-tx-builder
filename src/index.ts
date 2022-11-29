@@ -1,104 +1,111 @@
-import { Coin, coin, Registry, OfflineSigner } from '@cosmjs/proto-signing'
+import { Coin, coin, Registry, OfflineSigner, EncodeObject } from '@cosmjs/proto-signing'
 import {
   SigningStargateClient,
-  defaultRegistryTypes as defaultStargateTypes
+  SignerData,
+  defaultRegistryTypes as defaultStargateTypes,
+  AminoTypes,
+  createAuthzAminoConverters,
+  createBankAminoConverters,
+  createDistributionAminoConverters,
+  createFreegrantAminoConverters,
+  createGovAminoConverters,
+  createIbcAminoConverters,
+  createStakingAminoConverters,
 } from '@cosmjs/stargate'
+import * as amino from '@cosmjs/amino'
+import { createVestingAminoConverters } from '@cosmjs/stargate/build/modules' // not exported from top level, but included in default amino converter types
 import { toAccAddress } from '@cosmjs/stargate/build/queryclient/utils'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
-
 import BN from 'bn.js'
+import { thorchain } from './amino'
+import * as codecs from './proto'
 
-import * as codecs from './protobuf'
+export interface ProtoTx {
+  readonly msg: readonly EncodeObject[]
+  readonly fee: {
+    readonly amount: readonly Coin[];
+    readonly gas: string;
+  }
+  readonly signatures: readonly amino.StdSignature[]
+  readonly memo: string | undefined
+}
+
+const isProtoTx = (tx: unknown): tx is ProtoTx => {
+  const msg = (tx as ProtoTx).msg[0]
+  return 'typeUrl' in msg
+}
 
 export async function sign(
-  jsonTx: any,
+  signerAddress: string,
+  tx: amino.StdTx | ProtoTx,
   signer: OfflineSigner,
-  sequence: string,
-  accountNumber: string,
-  chainId: string
+  { accountNumber, sequence, chainId }: SignerData,
+  prefix = "cosmos" // should ideally come from signer, but not exposed by cosmjs at this time
 ): Promise<{
   serialized: string
   body: string
   authInfoBytes: string
   signatures: string[]
 }> {
-  const myRegistry = new Registry(defaultStargateTypes)
-  console.log(`proto-tx-builder.sign seq: ${sequence}, acctNum: ${accountNumber}, chainId: ${chainId}`)
+  const myAminoTypes = new AminoTypes({
+    ...createAuthzAminoConverters(),
+    ...createBankAminoConverters(),
+    ...createDistributionAminoConverters(),
+    ...createFreegrantAminoConverters(),
+    ...createGovAminoConverters(),
+    ...createIbcAminoConverters(),
+    ...createStakingAminoConverters(prefix),
+    ...createVestingAminoConverters(),
+    ...thorchain.createAminoConverters(),
+  })
 
-  // custom osmosis modules
-  myRegistry.register(
-    '/osmosis.gamm.v1beta1.MsgSwapExactAmountIn',
-    codecs.osmosis.gamm.v1beta1.MsgSwapExactAmountIn
-  )
-  myRegistry.register(
-    '/osmosis.gamm.v1beta1.MsgSwapExactAmountOut',
-    codecs.osmosis.gamm.v1beta1.MsgSwapExactAmountOut
-  )
+  const myRegistry = new Registry(defaultStargateTypes)
+
+  // osmosis
+  myRegistry.register('/osmosis.gamm.v1beta1.MsgSwapExactAmountIn', codecs.osmosis.gamm.v1beta1.MsgSwapExactAmountIn)
+  myRegistry.register('/osmosis.gamm.v1beta1.MsgSwapExactAmountOut', codecs.osmosis.gamm.v1beta1.MsgSwapExactAmountOut)
   myRegistry.register('/osmosis.gamm.v1beta1.MsgJoinPool', codecs.osmosis.gamm.v1beta1.MsgJoinPool)
   myRegistry.register('/osmosis.gamm.v1beta1.MsgExitPool', codecs.osmosis.gamm.v1beta1.MsgExitPool)
-  myRegistry.register(
-    '/osmosis.gamm.v1beta1.MsgCreatePool',
-    codecs.osmosis.gamm.v1beta1.MsgCreatePool
-  )
+  myRegistry.register('/osmosis.gamm.v1beta1.MsgCreatePool', codecs.osmosis.gamm.v1beta1.MsgCreatePool)
   myRegistry.register('/osmosis.gamm.v1beta1.PoolParams', codecs.osmosis.gamm.v1beta1.PoolParams)
   myRegistry.register('/osmosis.gamm.v1beta1.PoolAsset', codecs.osmosis.gamm.v1beta1.PoolAsset)
-  myRegistry.register(
-    '/osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn',
-    codecs.osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn
-  )
-  myRegistry.register(
-    '/osmosis.gamm.v1beta1.MsgExitSwapExternAmountOut',
-    codecs.osmosis.gamm.v1beta1.MsgExitSwapExternAmountOut
-  )
-  myRegistry.register(
-    '/osmosis.gamm.v1beta1.SwapAmountInRoute',
-    codecs.osmosis.gamm.v1beta1.SwapAmountInRoute
-  )
-  myRegistry.register(
-    '/osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn',
-    codecs.osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn
-  )
-
-  // staking
+  myRegistry.register('/osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn', codecs.osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn)
+  myRegistry.register('/osmosis.gamm.v1beta1.MsgExitSwapExternAmountOut', codecs.osmosis.gamm.v1beta1.MsgExitSwapExternAmountOut)
+  myRegistry.register('/osmosis.gamm.v1beta1.SwapAmountInRoute', codecs.osmosis.gamm.v1beta1.SwapAmountInRoute)
+  myRegistry.register('/osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn', codecs.osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn)
   myRegistry.register('/osmosis.lockup.MsgLockTokens', codecs.osmosis.lockup.MsgLockTokens)
   myRegistry.register('/osmosis.lockup.MsgBeginUnlocking', codecs.osmosis.lockup.MsgBeginUnlocking)
-  myRegistry.register(
-    '/osmosis.lockup.MsgBeginUnlockingAll',
-    codecs.osmosis.lockup.MsgBeginUnlockingAll
-  )
+  myRegistry.register('/osmosis.lockup.MsgBeginUnlockingAll', codecs.osmosis.lockup.MsgBeginUnlockingAll)
 
   // thorchain
   myRegistry.register('/types.MsgSend', codecs.thorchain_types.MsgSend)
   myRegistry.register('/types.MsgDeposit', codecs.thorchain_types.MsgDeposit)
 
-  const clientOffline = await SigningStargateClient.offline(signer, {
-    registry: myRegistry
-  })
+  const clientOffline = await SigningStargateClient.offline(signer, { registry: myRegistry, aminoTypes: myAminoTypes, })
 
-  const convertedMsg = parse_legacy_tx_format(jsonTx)
-  // console.info('CONVERTED TX: ', JSON.stringify(x))
-  const { msg, from, fee, memo } = convertedMsg
+  if (tx.msg.length !== 1) throw new Error('support for single message signing only')
 
-  if (!fee) {
-    throw new Error('fee must be defined after conversion')
-  }
+  const { msg, fee, memo } = (() => {
+    if (isProtoTx(tx)) {
+      return tx
+    } else {
+      return parse_legacy_tx_format(tx)
+    }
+  })()
 
-  // console.info(`calling clientOffline.sign with ${from}, ${JSON.stringify(fee)}, ${memo}. msg: `, JSON.stringify(msg))
-  const txRaw = await clientOffline.sign(from, [msg], fee, memo || '', {
-    accountNumber: Number(accountNumber),
-    sequence: Number(sequence),
-    chainId
-  })
-  // console.log('signedTx: ', JSON.stringify(txRaw))
+  if (!fee) throw new Error('fee must be defined after conversion')
 
+  const signerData: SignerData = { accountNumber: Number(accountNumber), sequence: Number(sequence), chainId }
+  const txRaw = await clientOffline.sign(signerAddress, msg, fee, memo ?? '', signerData)
   const encoded = TxRaw.encode(txRaw).finish()
+
   const output = {
     serialized: Buffer.from(encoded).toString('base64'),
     body: Buffer.from(txRaw.bodyBytes).toString('base64'),
     authInfoBytes: Buffer.from(txRaw.authInfoBytes).toString('base64'),
     signatures: txRaw.signatures.map((x) => Buffer.from(x).toString('base64'))
   }
-  // console.log('output: ', JSON.stringify(output))
+
   return output
 }
 
@@ -108,9 +115,11 @@ const scrubCoin = (x: Coin) => {
 
   return coin(x.amount, x.denom)
 }
-const scrubCoins = (x: Coin[]) => x.filter(c => c.amount).map(scrubCoin)
+
+const scrubCoins = (x: readonly Coin[]) => x.filter(c => c.amount).map(scrubCoin)
 
 type Route = { poolId: unknown; tokenOutDenom: unknown }
+
 const scrubRoute = (x: Route) => {
   if (!x.poolId) throw new Error('missing route poolId')
   if (!x.tokenOutDenom) throw new Error('missing route tokenOutDenom')
@@ -120,37 +129,24 @@ const scrubRoute = (x: Route) => {
     tokenOutDenom: x.tokenOutDenom
   }
 }
+
 const scrubRoutes = (x: Route[]) => x.map(scrubRoute)
 
-function parse_legacy_tx_format(jsonTx: any): ConvertedMsg {
-  if (jsonTx.msg.length !== 1) throw new Error('multiple msgs not supported!')
+function parse_legacy_tx_format({ fee, memo, msg, signatures }: amino.StdTx): ProtoTx {
+  if (msg.length !== 1) throw new Error('multiple msgs not supported!')
 
   return {
-    ...convertLegacyMsg(jsonTx.msg[0]),
+    ...convertLegacyMsg(msg[0]),
     fee: {
-      amount: scrubCoins(jsonTx.fee.amount),
-      gas: jsonTx.fee.gas
+      amount: scrubCoins(fee.amount),
+      gas: fee.gas
     },
-    memo: jsonTx.memo
+    memo: memo,
+    signatures: signatures,
   }
 }
 
-type LegacyMsg = { type: string; value: any }
-type ConvertedMsg = {
-  from: string
-  msg: {
-    typeUrl: string,
-    value: any
-  }
-  memo?: string
-  fee?: {
-    gas: string
-    amount: Coin[]
-    gas_limit?: string
-  }
-}
-
-function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
+function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
   // switch for each tx type supported
   switch (msg.type) {
     case 'thorchain/MsgSend':
@@ -158,21 +154,19 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
       if (!msg.value.to_address) throw new Error('Missing to_address in msg')
 
       return {
-        from: msg.value.from_address,
-        msg: {
+        msg: [{
           typeUrl: '/types.MsgSend',
           value: {
             fromAddress: toAccAddress(msg.value.from_address),
             toAddress: toAccAddress(msg.value.to_address),
             amount: scrubCoins(msg.value.amount)
           }
-        },
-    }
+        }],
+      }
     case 'thorchain/MsgDeposit':
       if (msg.value.coins?.length !== 1) {
         throw new Error(`expected 1 input coin got ${msg.value.coins?.length}`)
       }
-      // console.info('MsgDeposit IN: ', JSON.stringify(msg))
       const inCoin = msg.value.coins[0]
       const parts = inCoin.asset.split(".")
       if (parts.length < 1) {
@@ -187,11 +181,10 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
         [symbol] = parts
         chain = "THOR"
       }
-    
+
       const [ticker] = symbol.split('-')
       return {
-        from: msg.value.signer,
-        msg: {
+        msg: [{
           typeUrl: '/types.MsgDeposit',
           value: {
             coins: [
@@ -208,52 +201,49 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
             memo: msg.value.memo,
             signer: toAccAddress(msg.value.signer)
           }
-        }
+        }]
       }
     case 'cosmos-sdk/MsgSend':
       if (!msg.value.from_address) throw new Error('Missing from_address in msg')
       if (!msg.value.to_address) throw new Error('Missing to_address in msg')
 
       return {
-        from: msg.value.from_address,
-        msg: {
+        msg: [{
           typeUrl: '/cosmos.bank.v1beta1.MsgSend',
           value: {
             fromAddress: msg.value.from_address,
             toAddress: msg.value.to_address,
             amount: scrubCoins(msg.value.amount)
           }
-        }
+        }]
       }
     case 'cosmos-sdk/MsgDelegate':
       if (!msg.value.delegator_address) throw new Error('Missing delegator_address in msg')
       if (!msg.value.validator_address) throw new Error('Missing validator_address in msg')
 
       return {
-        from: msg.value.delegator_address,
-        msg: {
+        msg: [{
           typeUrl: '/cosmos.staking.v1beta1.MsgDelegate',
           value: {
             delegatorAddress: msg.value.delegator_address,
             validatorAddress: msg.value.validator_address,
             amount: scrubCoin(msg.value.amount)
           }
-        }
+        }]
       }
     case 'cosmos-sdk/MsgUndelegate':
       if (!msg.value.delegator_address) throw new Error('Missing delegator_address in msg')
       if (!msg.value.validator_address) throw new Error('Missing validator_address in msg')
 
       return {
-        from: msg.value.delegator_address,
-        msg: {
+        msg: [{
           typeUrl: '/cosmos.staking.v1beta1.MsgUndelegate',
           value: {
             delegatorAddress: msg.value.delegator_address,
             validatorAddress: msg.value.validator_address,
             amount: scrubCoin(msg.value.amount)
           }
-        }
+        }]
       }
     case 'cosmos-sdk/MsgBeginRedelegate':
       if (!msg.value.delegator_address) throw new Error('Missing delegator_address in msg')
@@ -261,8 +251,7 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
       if (!msg.value.validator_dst_address) throw new Error('Missing validator_dst_address in msg')
 
       return {
-        from: msg.value.delegator_address,
-        msg: {
+        msg: [{
           typeUrl: '/cosmos.staking.v1beta1.MsgBeginRedelegate',
           value: {
             delegatorAddress: msg.value.delegator_address,
@@ -270,22 +259,21 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
             validatorDstAddress: msg.value.validator_dst_address,
             amount: scrubCoin(msg.value.amount)
           }
-        }
+        }]
       }
     case 'cosmos-sdk/MsgWithdrawDelegationReward':
       if (!msg.value.delegator_address) throw new Error('Missing delegator_address in msg')
       if (!msg.value.validator_address) throw new Error('Missing validator_address in msg')
 
       return {
-        from: msg.value.delegator_address,
-        msg: {
+        msg: [{
           typeUrl: '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
           value: {
             delegatorAddress: msg.value.delegator_address,
             validatorAddress: msg.value.validator_address,
             amount: msg.value.amount ? scrubCoin(msg.value.amount) : undefined
           }
-        }
+        }]
       }
     case 'cosmos-sdk/MsgTransfer':
       if (!msg.value.receiver) throw new Error('Missing receiver in msg')
@@ -296,8 +284,7 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
         throw new Error('Missing revision_height in msg value.timeout_height')
 
       return {
-        from: msg.value.sender,
-        msg: {
+        msg: [{
           typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
           value: {
             receiver: msg.value.receiver,
@@ -311,7 +298,7 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
             },
             timeoutTimestamp: "0"
           }
-        }
+        }]
       }
     case 'osmosis/gamm/swap-exact-amount-in':
       if (!msg.value.sender) throw new Error('Missing sender in msg')
@@ -320,8 +307,7 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
       if (msg.value.routes.length !== 1) throw new Error('bad routes length')
 
       return {
-        from: msg.value.sender,
-        msg: {
+        msg: [{
           typeUrl: '/osmosis.gamm.v1beta1.MsgSwapExactAmountIn',
           value: {
             sender: msg.value.sender,
@@ -329,7 +315,7 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
             tokenOutMinAmount: msg.value.tokenOutMinAmount,
             routes: scrubRoutes(msg.value.routes)
           }
-        }
+        }]
       }
     case 'osmosis/gamm/join-pool':
       if (!msg.value.sender) throw new Error('Missing sender in msg')
@@ -338,8 +324,7 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
       if (msg.value.tokenInMaxs.length !== 2) throw new Error('bad tokenInMaxs length')
 
       return {
-        from: msg.value.sender,
-        msg: {
+        msg: [{
           typeUrl: '/osmosis.gamm.v1beta1.MsgJoinPool',
           value: {
             sender: msg.value.sender,
@@ -347,7 +332,7 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
             shareOutAmount: msg.value.shareOutAmount,
             tokenInMaxs: scrubCoins(msg.value.tokenInMaxs)
           }
-        }
+        }]
       }
     case 'osmosis/gamm/exit-pool':
       if (!msg.value.sender) throw new Error('Missing sender in msg')
@@ -356,8 +341,7 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
       if (msg.value.tokenOutMins.length !== 2) throw new Error('bad tokenOutMins length')
 
       return {
-        from: msg.value.sender,
-        msg: {
+        msg: [{
           typeUrl: '/osmosis.gamm.v1beta1.MsgExitPool',
           value: {
             sender: msg.value.sender,
@@ -365,7 +349,7 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
             shareInAmount: msg.value.shareInAmount,
             tokenOutMins: scrubCoins(msg.value.tokenOutMins)
           }
-        }
+        }]
       }
     case 'osmosis/lockup/lock-tokens': {
       if (!msg.value.owner) throw new Error('Missing owner in msg')
@@ -377,28 +361,26 @@ function convertLegacyMsg(msg: LegacyMsg): ConvertedMsg {
       const nanos = duration.umod(nanosPerSecond).toString()
 
       return {
-        from: msg.value.owner,
-        msg: {
+        msg: [{
           typeUrl: '/osmosis.lockup.MsgLockTokens',
           value: {
             owner: msg.value.owner,
             duration: { seconds, nanos },
             coins: scrubCoins(msg.value.coins)
           }
-        }
+        }]
       }
     }
     case 'osmosis/lockup/begin-unlock-period-lock':
       if (!msg.value.owner) throw new Error('Missing owner in msg')
 
       return {
-        from: msg.value.owner,
-        msg: {
+        msg: [{
           typeUrl: '/osmosis.lockup.MsgBeginUnlockingAll',
           value: {
             owner: msg.value.owner
           }
-        }
+        }]
       }
     default:
       throw new Error('Unhandled tx type! type: ' + msg.type)
