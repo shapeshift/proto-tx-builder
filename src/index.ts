@@ -7,12 +7,11 @@ import {
   createAuthzAminoConverters,
   createBankAminoConverters,
   createDistributionAminoConverters,
-  createFreegrantAminoConverters,
+  createFeegrantAminoConverters,
   createGovAminoConverters,
   createIbcAminoConverters,
   createStakingAminoConverters,
 } from '@cosmjs/stargate'
-
 
 import * as amino from '@cosmjs/amino'
 import { createVestingAminoConverters } from '@cosmjs/stargate/build/modules' // not exported from top level, but included in default amino converter types
@@ -50,12 +49,11 @@ export async function sign(
   signatures: string[]
 }> {
 
-
   const myAminoTypes = new AminoTypes({
     ...createAuthzAminoConverters(),
     ...createBankAminoConverters(),
     ...createDistributionAminoConverters(),
-    ...createFreegrantAminoConverters(),
+    ...createFeegrantAminoConverters(),
     ...createGovAminoConverters(),
     ...createIbcAminoConverters(),
     ...createStakingAminoConverters(prefix),
