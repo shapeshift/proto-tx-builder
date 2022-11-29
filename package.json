@@ -32,13 +32,14 @@
     "typescript": "^4.2.4"
   },
   "dependencies": {
-    "@cosmjs/encoding": "^0.28.13",
-    "@cosmjs/proto-signing": "^0.28.13",
-    "@cosmjs/stargate": "^0.28.13",
-    "@cosmjs/tendermint-rpc": "^0.28.13",
+    "@cosmjs/amino": "^0.29.4",
+    "@cosmjs/crypto": "0.29.4",
+    "@cosmjs/encoding": "^0.29.4",
+    "@cosmjs/proto-signing": "^0.29.4",
+    "@cosmjs/stargate": "^0.29.4",
     "bn.js": "^5.2.1",
     "cosmjs-types": "^0.5.1",
     "google-protobuf": "^3.17.0",
-    "long": "^4.0.0"
+    "osmojs": "^0.37.0"
   }
 }

@@ -7,17 +7,19 @@ import {
   createAuthzAminoConverters,
   createBankAminoConverters,
   createDistributionAminoConverters,
-  createFreegrantAminoConverters,
+  createFeegrantAminoConverters,
   createGovAminoConverters,
   createIbcAminoConverters,
   createStakingAminoConverters,
 } from '@cosmjs/stargate'
+
 import * as amino from '@cosmjs/amino'
 import { createVestingAminoConverters } from '@cosmjs/stargate/build/modules' // not exported from top level, but included in default amino converter types
 import { toAccAddress } from '@cosmjs/stargate/build/queryclient/utils'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
+
 import BN from 'bn.js'
-import { thorchain } from './amino'
+import { osmosis, thorchain } from './amino'
 import * as codecs from './proto'
 
 export interface ProtoTx {
@@ -47,16 +49,18 @@ export async function sign(
   authInfoBytes: string
   signatures: string[]
 }> {
+
   const myAminoTypes = new AminoTypes({
     ...createAuthzAminoConverters(),
     ...createBankAminoConverters(),
     ...createDistributionAminoConverters(),
-    ...createFreegrantAminoConverters(),
+    ...createFeegrantAminoConverters(),
     ...createGovAminoConverters(),
     ...createIbcAminoConverters(),
     ...createStakingAminoConverters(prefix),
     ...createVestingAminoConverters(),
     ...thorchain.createAminoConverters(),
+    ...osmosis.createAminoConverters()
   })
 
   const myRegistry = new Registry(defaultStargateTypes)
