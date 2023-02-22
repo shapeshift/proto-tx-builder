@@ -146,7 +146,6 @@ const scrubRoute = (x: Route) => {
 const scrubRoutes = (x: Route[]) => x.map(scrubRoute)
 
 function parse_legacy_tx_format(tx:  StdTxWithMsgs): ProtoTx {
-  if(!tx.msgs) throw new Error('msgs array improperly formatted!')
 
   if (tx.msgs.length !== 1) throw new Error('multiple msgs not supported!')
 
