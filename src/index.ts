@@ -28,7 +28,7 @@ type StdTxWithMsgs = Omit<amino.StdTx, 'msg'> & {
   
 
 export interface ProtoTx {
-  readonly msg: readonly EncodeObject[]
+  readonly messages: readonly EncodeObject[]
   readonly fee: {
     readonly amount: readonly Coin[];
     readonly gas: string;
@@ -38,11 +38,11 @@ export interface ProtoTx {
 }
 
 const isProtoTx = (tx: unknown): tx is ProtoTx => {
-  const msg = (tx as ProtoTx).msg[0]
-  return 'typeUrl' in msg
+  const message = (tx as ProtoTx).messages[0]
+  return 'typeUrl' in message
 }
 
-const getMessages = (tx: StdTxWithMsgs | ProtoTx) => 'msgs' in tx ? tx.msgs : tx.msg
+const getMessages = (tx: StdTxWithMsgs | ProtoTx) => 'msgs' in tx ? tx.msgs : tx.messages
 
 export async function sign(
   signerAddress: string,
@@ -94,11 +94,11 @@ export async function sign(
   myRegistry.register('/types.MsgDeposit', codecs.thorchain_types.MsgDeposit)
 
   const clientOffline = await SigningStargateClient.offline(signer, { registry: myRegistry, aminoTypes: myAminoTypes, })
-  const messages = getMessages(tx)
+  const txMessages = getMessages(tx)
 
-  if (messages.length !== 1) throw new Error('support for single message signing only')
+  if (txMessages.length !== 1) throw new Error('support for single message signing only')
 
-  const { msg, fee, memo } = (() => {
+  const { messages, fee, memo } = (() => {
     if (isProtoTx(tx)) {
       return tx
     } else {
@@ -109,7 +109,7 @@ export async function sign(
   if (!fee) throw new Error('fee must be defined after conversion')
 
   const signerData: SignerData = { accountNumber: Number(accountNumber), sequence: Number(sequence), chainId }
-  const txRaw = await clientOffline.sign(signerAddress, msg, fee, memo ?? '', signerData)
+  const txRaw = await clientOffline.sign(signerAddress, messages, fee, memo ?? '', signerData)
   const encoded = TxRaw.encode(txRaw).finish()
 
   const output = {
@@ -161,28 +161,28 @@ function parse_legacy_tx_format(tx:  StdTxWithMsgs): ProtoTx {
   }
 }
 
-function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
+function convertLegacyMsg(message: amino.AminoMsg): Pick<ProtoTx, 'messages'> {
   // switch for each tx type supported
-  switch (msg.type) {
+  switch (message.type) {
     case 'thorchain/MsgSend':
-      if (!msg.value.from_address) throw new Error('Missing from_address in msg')
-      if (!msg.value.to_address) throw new Error('Missing to_address in msg')
+      if (!message.value.from_address) throw new Error('Missing from_address in msgs')
+      if (!message.value.to_address) throw new Error('Missing to_address in msgs')
 
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/types.MsgSend',
           value: {
-            fromAddress: toAccAddress(msg.value.from_address),
-            toAddress: toAccAddress(msg.value.to_address),
-            amount: scrubCoins(msg.value.amount)
+            fromAddress: toAccAddress(message.value.from_address),
+            toAddress: toAccAddress(message.value.to_address),
+            amount: scrubCoins(message.value.amount)
           }
         }],
       }
     case 'thorchain/MsgDeposit':
-      if (msg.value.coins?.length !== 1) {
-        throw new Error(`expected 1 input coin got ${msg.value.coins?.length}`)
+      if (message.value.coins?.length !== 1) {
+        throw new Error(`expected 1 input coin got ${message.value.coins?.length}`)
       }
-      const inCoin = msg.value.coins[0]
+      const inCoin = message.value.coins[0]
       const parts = inCoin.asset.split(".")
       if (parts.length < 1) {
         throw new Error(`expected 1 or 2 parts to asset got ${parts.length}`)
@@ -199,7 +199,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
 
       const [ticker] = symbol.split('-')
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/types.MsgDeposit',
           value: {
             coins: [
@@ -213,222 +213,222 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
                 amount: inCoin.amount
               }
             ],
-            memo: msg.value.memo,
-            signer: toAccAddress(msg.value.signer)
+            memo: message.value.memo,
+            signer: toAccAddress(message.value.signer)
           }
         }]
       }
     case 'cosmos-sdk/MsgSend':
-      if (!msg.value.from_address) throw new Error('Missing from_address in msg')
-      if (!msg.value.to_address) throw new Error('Missing to_address in msg')
+      if (!message.value.from_address) throw new Error('Missing from_address in msgs')
+      if (!message.value.to_address) throw new Error('Missing to_address in msgs')
 
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/cosmos.bank.v1beta1.MsgSend',
           value: {
-            fromAddress: msg.value.from_address,
-            toAddress: msg.value.to_address,
-            amount: scrubCoins(msg.value.amount)
+            fromAddress: message.value.from_address,
+            toAddress: message.value.to_address,
+            amount: scrubCoins(message.value.amount)
           }
         }]
       }
     case 'cosmos-sdk/MsgDelegate':
-      if (!msg.value.delegator_address) throw new Error('Missing delegator_address in msg')
-      if (!msg.value.validator_address) throw new Error('Missing validator_address in msg')
+      if (!message.value.delegator_address) throw new Error('Missing delegator_address in msgs')
+      if (!message.value.validator_address) throw new Error('Missing validator_address in msgs')
 
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/cosmos.staking.v1beta1.MsgDelegate',
           value: {
-            delegatorAddress: msg.value.delegator_address,
-            validatorAddress: msg.value.validator_address,
-            amount: scrubCoin(msg.value.amount)
+            delegatorAddress: message.value.delegator_address,
+            validatorAddress: message.value.validator_address,
+            amount: scrubCoin(message.value.amount)
           }
         }]
       }
     case 'cosmos-sdk/MsgUndelegate':
-      if (!msg.value.delegator_address) throw new Error('Missing delegator_address in msg')
-      if (!msg.value.validator_address) throw new Error('Missing validator_address in msg')
+      if (!message.value.delegator_address) throw new Error('Missing delegator_address in msgs')
+      if (!message.value.validator_address) throw new Error('Missing validator_address in msgs')
 
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/cosmos.staking.v1beta1.MsgUndelegate',
           value: {
-            delegatorAddress: msg.value.delegator_address,
-            validatorAddress: msg.value.validator_address,
-            amount: scrubCoin(msg.value.amount)
+            delegatorAddress: message.value.delegator_address,
+            validatorAddress: message.value.validator_address,
+            amount: scrubCoin(message.value.amount)
           }
         }]
       }
     case 'cosmos-sdk/MsgBeginRedelegate':
-      if (!msg.value.delegator_address) throw new Error('Missing delegator_address in msg')
-      if (!msg.value.validator_src_address) throw new Error('Missing validator_src_address in msg')
-      if (!msg.value.validator_dst_address) throw new Error('Missing validator_dst_address in msg')
+      if (!message.value.delegator_address) throw new Error('Missing delegator_address in msgs')
+      if (!message.value.validator_src_address) throw new Error('Missing validator_src_address in msgs')
+      if (!message.value.validator_dst_address) throw new Error('Missing validator_dst_address in msgs')
 
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/cosmos.staking.v1beta1.MsgBeginRedelegate',
           value: {
-            delegatorAddress: msg.value.delegator_address,
-            validatorSrcAddress: msg.value.validator_src_address,
-            validatorDstAddress: msg.value.validator_dst_address,
-            amount: scrubCoin(msg.value.amount)
+            delegatorAddress: message.value.delegator_address,
+            validatorSrcAddress: message.value.validator_src_address,
+            validatorDstAddress: message.value.validator_dst_address,
+            amount: scrubCoin(message.value.amount)
           }
         }]
       }
     case 'cosmos-sdk/MsgWithdrawDelegationReward':
-      if (!msg.value.delegator_address) throw new Error('Missing delegator_address in msg')
-      if (!msg.value.validator_address) throw new Error('Missing validator_address in msg')
+      if (!message.value.delegator_address) throw new Error('Missing delegator_address in msgs')
+      if (!message.value.validator_address) throw new Error('Missing validator_address in msgs')
 
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
           value: {
-            delegatorAddress: msg.value.delegator_address,
-            validatorAddress: msg.value.validator_address,
-            amount: msg.value.amount ? scrubCoin(msg.value.amount) : undefined
+            delegatorAddress: message.value.delegator_address,
+            validatorAddress: message.value.validator_address,
+            amount: message.value.amount ? scrubCoin(message.value.amount) : undefined
           }
         }]
       }
     case 'cosmos-sdk/MsgTransfer':
-      if (!msg.value.receiver) throw new Error('Missing receiver in msg')
-      if (!msg.value.sender) throw new Error('Missing sender in msg')
-      if (!msg.value.source_channel) throw new Error('Missing source_channel in msg')
-      if (!msg.value.source_port) throw new Error('Missing source_port in msg')
-      if (!msg.value.timeout_height.revision_height)
-        throw new Error('Missing revision_height in msg value.timeout_height')
+      if (!message.value.receiver) throw new Error('Missing receiver in msgs')
+      if (!message.value.sender) throw new Error('Missing sender in msgs')
+      if (!message.value.source_channel) throw new Error('Missing source_channel in msgs')
+      if (!message.value.source_port) throw new Error('Missing source_port in msgs')
+      if (!message.value.timeout_height.revision_height)
+        throw new Error('Missing revision_height in msgs value.timeout_height')
 
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/ibc.applications.transfer.v1.MsgTransfer',
           value: {
-            receiver: msg.value.receiver,
-            sender: msg.value.sender,
-            sourceChannel: msg.value.source_channel,
-            sourcePort: msg.value.source_port,
-            token: scrubCoin(msg.value.token),
+            receiver: message.value.receiver,
+            sender: message.value.sender,
+            sourceChannel: message.value.source_channel,
+            sourcePort: message.value.source_port,
+            token: scrubCoin(message.value.token),
             timeoutHeight: {
-              revisionHeight: msg.value.timeout_height.revision_height,
-              revisionNumber: msg.value.timeout_height.revision_number
+              revisionHeight: message.value.timeout_height.revision_height,
+              revisionNumber: message.value.timeout_height.revision_number
             },
             timeoutTimestamp: "0"
           }
         }]
       }
     case 'osmosis/gamm/swap-exact-amount-in':
-      if (!msg.value.sender) throw new Error('Missing sender in msg')
-      if (!msg.value.token_in) throw new Error('Missing token_in in msg')
-      if (!msg.value.token_out_min_amount) throw new Error('Missing token_out_min_amount in msg')
-      if (msg.value.routes.length !== 1) throw new Error('bad routes length')
+      if (!message.value.sender) throw new Error('Missing sender in msgs')
+      if (!message.value.token_in) throw new Error('Missing token_in in msgs')
+      if (!message.value.token_out_min_amount) throw new Error('Missing token_out_min_amount in msgs')
+      if (message.value.routes.length !== 1) throw new Error('bad routes length')
 
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/osmosis.gamm.v1beta1.MsgSwapExactAmountIn',
           value: {
-            sender: msg.value.sender,
-            tokenIn: scrubCoin(msg.value.token_in),
-            tokenOutMinAmount: msg.value.token_out_min_amount,
-            routes: scrubRoutes(msg.value.routes)
+            sender: message.value.sender,
+            tokenIn: scrubCoin(message.value.token_in),
+            tokenOutMinAmount: message.value.token_out_min_amount,
+            routes: scrubRoutes(message.value.routes)
           }
         }]
       }
     case 'osmosis/gamm/join-swap-extern-amount-in':
-        if (!msg.value.pool_id) throw new Error('Missing pool_id in msg')
-        if (!msg.value.sender) throw new Error('Missing sender in msg')
-        if (!msg.value.share_out_min_amount) throw new Error('Missing share_out_min_amount in msg')
-        if (!msg.value.tokenIn) throw new Error('Missing tokenIn in msg')
+        if (!message.value.pool_id) throw new Error('Missing pool_id in msgs')
+        if (!message.value.sender) throw new Error('Missing sender in msgs')
+        if (!message.value.share_out_min_amount) throw new Error('Missing share_out_min_amount in msgs')
+        if (!message.value.tokenIn) throw new Error('Missing tokenIn in msgs')
   
         return {
-          msg: [{
+          messages: [{
             typeUrl: '/osmosis.gamm.v1beta1.MsgJoinSwapExternAmountIn',
             value: {
-              poolId: msg.value.pool_id,
-              sender: msg.value.sender,
-              shareOutMinAmount: msg.value.share_out_min_amount,
-              tokenIn: scrubCoin(msg.value.token_in),
+              poolId: message.value.pool_id,
+              sender: message.value.sender,
+              shareOutMinAmount: message.value.share_out_min_amount,
+              tokenIn: scrubCoin(message.value.token_in),
               
             }
           }]
         }
     case 'osmosis/gamm/join-pool':
-      if (!msg.value.sender) throw new Error('Missing sender in msg')
-      if (!msg.value.pool_id) throw new Error('Missing pool_id in msg')
-      if (!msg.value.share_out_amount) throw new Error('Missing share_out_amount in msg')
-      if (msg.value.token_in_maxs.length  !== 2) throw new Error('Bad token_in_maxs length')
+      if (!message.value.sender) throw new Error('Missing sender in msgs')
+      if (!message.value.pool_id) throw new Error('Missing pool_id in msgs')
+      if (!message.value.share_out_amount) throw new Error('Missing share_out_amount in msgs')
+      if (message.value.token_in_maxs.length  !== 2) throw new Error('Bad token_in_maxs length')
 
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/osmosis.gamm.v1beta1.MsgJoinPool',
           value: {
-            sender: msg.value.sender,
-            poolId: msg.value.pool_id,
-            shareOutAmount: msg.value.share_out_amount,
-            tokenInMaxs: scrubCoins(msg.value.token_in_maxs)
+            sender: message.value.sender,
+            poolId: message.value.pool_id,
+            shareOutAmount: message.value.share_out_amount,
+            tokenInMaxs: scrubCoins(message.value.token_in_maxs)
           }
         }]
       }
     case 'osmosis/gamm/exit-pool':
-      if (!msg.value.sender) throw new Error('Missing sender in msg')
-      if (!msg.value.pool_id) throw new Error('Missing pool_id in msg')
-      if (!msg.value.share_in_amount) throw new Error('Missing share_in_amount in msg')
-      if (msg.value.token_out_mins.length !== 2) throw new Error('Bad token_out_mins length')
+      if (!message.value.sender) throw new Error('Missing sender in msgs')
+      if (!message.value.pool_id) throw new Error('Missing pool_id in msgs')
+      if (!message.value.share_in_amount) throw new Error('Missing share_in_amount in msgs')
+      if (message.value.token_out_mins.length !== 2) throw new Error('Bad token_out_mins length')
 
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/osmosis.gamm.v1beta1.MsgExitPool',
           value: {
-            sender: msg.value.sender,
-            poolId: msg.value.pool_id,
-            shareInAmount: msg.value.share_in_amount,
-            tokenOutMins: scrubCoins(msg.value.token_out_mins)
+            sender: message.value.sender,
+            poolId: message.value.pool_id,
+            shareInAmount: message.value.share_in_amount,
+            tokenOutMins: scrubCoins(message.value.token_out_mins)
           }
         }]
       }
     case 'osmosis/lockup/lock-tokens': {
-      if (!msg.value.owner) throw new Error('Missing owner in msg')
-      if (!msg.value.duration) throw new Error('Missing duration in msg')
+      if (!message.value.owner) throw new Error('Missing owner in msgs')
+      if (!message.value.duration) throw new Error('Missing duration in msgs')
 
-      const duration = new BN(msg.value.duration)
+      const duration = new BN(message.value.duration)
       const nanosPerSecond = new BN("1000000000")
       const seconds = duration.div(nanosPerSecond).toString()
       const nanos = duration.umod(nanosPerSecond).toString()
 
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/osmosis.lockup.MsgLockTokens',
           value: {
-            owner: msg.value.owner,
+            owner: message.value.owner,
             duration: { seconds, nanos },
-            coins: scrubCoins(msg.value.coins)
+            coins: scrubCoins(message.value.coins)
           }
         }]
       }
     }
     case 'osmosis/lockup/begin-unlock-period-lock':
-      if (!msg.value.owner) throw new Error('Missing owner in msg')
+      if (!message.value.owner) throw new Error('Missing owner in msgs')
 
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/osmosis.lockup.MsgBeginUnlockingAll',
           value: {
-            owner: msg.value.owner
+            owner: message.value.owner
           }
         }]
       }
     case 'osmosis/lockup/begin-unlock-by-id':
-      if (!msg.value.id) throw new Error('Missing id in msg')
-      if (!msg.value.owner) throw new Error('Missing owner in msg')
+      if (!message.value.id) throw new Error('Missing id in msgs')
+      if (!message.value.owner) throw new Error('Missing owner in msgs')
 
       return {
-        msg: [{
+        messages: [{
           typeUrl: '/osmosis.lockup.MsgBeginUnlocking',
           value: {
-            owner: msg.value.owner,
-            id: msg.value.id
+            owner: message.value.owner,
+            id: message.value.id
           }
         }]
       }
     default:
-      throw new Error('Unhandled tx type! type: ' + msg.type)
+      throw new Error('Unhandled tx type! type: ' + message.type)
   }
 }
