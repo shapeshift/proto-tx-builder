@@ -22,6 +22,18 @@ import BN from 'bn.js'
 import { osmosis, thorchain } from './amino'
 import * as codecs from './proto'
 
+type AgnosticStdTx = Omit<amino.StdTx, 'msg'> &
+  (
+    | {
+        readonly msg?: readonly amino.AminoMsg[]
+        msgs?: never;
+      }
+    | {
+        readonly msgs?: readonly amino.AminoMsg[]
+        msg: never;
+      }
+  )
+
 export interface ProtoTx {
   readonly msg: readonly EncodeObject[]
   readonly fee: {
@@ -76,6 +88,7 @@ export async function sign(
   myRegistry.register('/osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn', codecs.osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn)
   myRegistry.register('/osmosis.gamm.v1beta1.MsgExitSwapExternAmountOut', codecs.osmosis.gamm.v1beta1.MsgExitSwapExternAmountOut)
   myRegistry.register('/osmosis.gamm.v1beta1.SwapAmountInRoute', codecs.osmosis.gamm.v1beta1.SwapAmountInRoute)
+  myRegistry.register('/osmosis.gamm.v1beta1.MsgJoinSwapExternAmountIn', codecs.osmosis.gamm.v1beta1.MsgJoinSwapExternAmountIn)
   myRegistry.register('/osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn', codecs.osmosis.gamm.v1beta1.MsgExitSwapShareAmountIn)
   myRegistry.register('/osmosis.lockup.MsgLockTokens', codecs.osmosis.lockup.MsgLockTokens)
   myRegistry.register('/osmosis.lockup.MsgBeginUnlocking', codecs.osmosis.lockup.MsgBeginUnlocking)
@@ -122,31 +135,34 @@ const scrubCoin = (x: Coin) => {
 
 const scrubCoins = (x: readonly Coin[]) => x.filter(c => c.amount).map(scrubCoin)
 
-type Route = { poolId: unknown; tokenOutDenom: unknown }
+type Route = { pool_id: unknown; token_out_denom: unknown }
 
 const scrubRoute = (x: Route) => {
-  if (!x.poolId) throw new Error('missing route poolId')
-  if (!x.tokenOutDenom) throw new Error('missing route tokenOutDenom')
+  if (!x.pool_id) throw new Error('missing route pool_id')
+  if (!x.token_out_denom) throw new Error('missing route token_out_denom')
 
   return {
-    poolId: x.poolId,
-    tokenOutDenom: x.tokenOutDenom
+    poolId: x.pool_id,
+    tokenOutDenom: x.token_out_denom
   }
 }
 
 const scrubRoutes = (x: Route[]) => x.map(scrubRoute)
 
-function parse_legacy_tx_format({ fee, memo, msg, signatures }: amino.StdTx): ProtoTx {
-  if (msg.length !== 1) throw new Error('multiple msgs not supported!')
+function parse_legacy_tx_format(tx: AgnosticStdTx): ProtoTx {
+  const msgOrMsgs = tx.msg ?? tx.msgs
+  if(!msgOrMsgs) throw new Error('msgs array improperly formatted!')
+
+  if (msgOrMsgs.length !== 1) throw new Error('multiple msgs not supported!')
 
   return {
-    ...convertLegacyMsg(msg[0]),
+    ...convertLegacyMsg(msgOrMsgs[0]),
     fee: {
-      amount: scrubCoins(fee.amount),
-      gas: fee.gas
+      amount: scrubCoins(tx.fee.amount),
+      gas: tx.fee.gas
     },
-    memo: memo,
-    signatures: signatures,
+    memo: tx.memo,
+    signatures: tx.signatures,
   }
 }
 
@@ -306,8 +322,8 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
       }
     case 'osmosis/gamm/swap-exact-amount-in':
       if (!msg.value.sender) throw new Error('Missing sender in msg')
-      if (!msg.value.tokenIn) throw new Error('Missing tokenIn in msg')
-      if (!msg.value.tokenOutMinAmount) throw new Error('Missing tokenOutMinAmount in msg')
+      if (!msg.value.token_in) throw new Error('Missing token_in in msg')
+      if (!msg.value.token_out_min_amount) throw new Error('Missing token_out_min_amount in msg')
       if (msg.value.routes.length !== 1) throw new Error('bad routes length')
 
       return {
@@ -315,43 +331,61 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
           typeUrl: '/osmosis.gamm.v1beta1.MsgSwapExactAmountIn',
           value: {
             sender: msg.value.sender,
-            tokenIn: scrubCoin(msg.value.tokenIn),
-            tokenOutMinAmount: msg.value.tokenOutMinAmount,
+            tokenIn: scrubCoin(msg.value.token_in),
+            tokenOutMinAmount: msg.value.token_out_min_amount,
             routes: scrubRoutes(msg.value.routes)
           }
         }]
       }
+    case 'osmosis/gamm/join-swap-extern-amount-in':
+        if (!msg.value.pool_id) throw new Error('Missing pool_id in msg')
+        if (!msg.value.sender) throw new Error('Missing sender in msg')
+        if (!msg.value.share_out_min_amount) throw new Error('Missing share_out_min_amount in msg')
+        if (!msg.value.tokenIn) throw new Error('Missing tokenIn in msg')
+  
+        return {
+          msg: [{
+            typeUrl: '/osmosis.gamm.v1beta1.MsgJoinSwapExternAmountIn',
+            value: {
+              poolId: msg.value.pool_id,
+              sender: msg.value.sender,
+              shareOutMinAmount: msg.value.share_out_min_amount,
+              tokenIn: scrubCoin(msg.value.token_in),
+              
+            }
+          }]
+        }
     case 'osmosis/gamm/join-pool':
       if (!msg.value.sender) throw new Error('Missing sender in msg')
-      if (!msg.value.poolId) throw new Error('Missing poolId in msg')
-      if (!msg.value.shareOutAmount) throw new Error('Missing shareOutAmount in msg')
-      if (msg.value.tokenInMaxs.length !== 2) throw new Error('bad tokenInMaxs length')
+      if (!msg.value.pool_id) throw new Error('Missing pool_id in msg')
+      if (!msg.value.share_out_amount) throw new Error('Missing share_out_amount in msg')
+      if (msg.value.token_in_maxs.length  !== 2) throw new Error('Bad token_in_maxs length')
 
       return {
         msg: [{
           typeUrl: '/osmosis.gamm.v1beta1.MsgJoinPool',
           value: {
             sender: msg.value.sender,
-            poolId: msg.value.poolId,
-            shareOutAmount: msg.value.shareOutAmount,
-            tokenInMaxs: scrubCoins(msg.value.tokenInMaxs)
+            poolId: msg.value.pool_id,
+            shareOutAmount: msg.value.share_out_amount,
+            tokenInMaxs: scrubCoins(msg.value.token_in_maxs)
           }
         }]
       }
     case 'osmosis/gamm/exit-pool':
       if (!msg.value.sender) throw new Error('Missing sender in msg')
-      if (!msg.value.poolId) throw new Error('Missing poolId in msg')
-      if (!msg.value.shareInAmount) throw new Error('Missing shareInAmount in msg')
-      if (msg.value.tokenOutMins.length !== 2) throw new Error('bad tokenOutMins length')
+      if (!msg.value.pool_id) throw new Error('Missing pool_id in msg')
+      if (!msg.value.share_in_amount) throw new Error('Missing share_in_amount in msg')
+      if (msg.value.token_out_mins.length !== 2) throw new Error('Bad token_out_mins length')
 
       return {
         msg: [{
           typeUrl: '/osmosis.gamm.v1beta1.MsgExitPool',
           value: {
             sender: msg.value.sender,
-            poolId: msg.value.poolId,
-            shareInAmount: msg.value.shareInAmount,
-            tokenOutMins: scrubCoins(msg.value.tokenOutMins)
+            poolId: msg.value.pool_id,
+            shareInAmount: msg.value.share_in_amount,
+            tokenOutMins: scrubCoins(msg.value.token_out_mins)
           }
         }]
       }
@@ -383,6 +417,19 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
           typeUrl: '/osmosis.lockup.MsgBeginUnlockingAll',
           value: {
             owner: msg.value.owner
+          }
+        }]
+      }
+    case 'osmosis/lockup/begin-unlock-by-id':
+      if (!msg.value.id) throw new Error('Missing id in msg')
+      if (!msg.value.owner) throw new Error('Missing owner in msg')
+
+      return {
+        msg: [{
+          typeUrl: '/osmosis.lockup.MsgBeginUnlocking',
+          value: {
+            owner: msg.value.owner,
+            id: msg.value.id
           }
         }]
       }
