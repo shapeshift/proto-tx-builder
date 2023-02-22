@@ -3,7 +3,7 @@
   "chain_id": "osmosis-1",
   "account_number": "95421",
   "sequence": "35",
-  "msg": [
+  "msgs": [
     {
       "type": "cosmos-sdk/MsgSend",
       "value": {

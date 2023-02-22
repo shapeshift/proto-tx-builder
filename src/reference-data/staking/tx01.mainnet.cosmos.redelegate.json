@@ -13,7 +13,7 @@
     "gas": "290000"
   },
   "memo": "",
-  "msg": [
+  "msgs": [
     {
       "type": "cosmos-sdk/MsgBeginRedelegate",
       "value": {
