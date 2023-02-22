@@ -22,17 +22,10 @@ import BN from 'bn.js'
 import { osmosis, thorchain } from './amino'
 import * as codecs from './proto'
 
-type AgnosticStdTx = Omit<amino.StdTx, 'msg'> &
-  (
-    | {
-        readonly msg?: readonly amino.AminoMsg[]
-        msgs?: never;
-      }
-    | {
-        readonly msgs?: readonly amino.AminoMsg[]
-        msg: never;
-      }
-  )
+type StdTxWithMsgs = Omit<amino.StdTx, 'msg'> & {
+  readonly msgs: readonly amino.AminoMsg[]
+}
+  
 
 export interface ProtoTx {
   readonly msg: readonly EncodeObject[]
@@ -51,7 +44,7 @@ const isProtoTx = (tx: unknown): tx is ProtoTx => {
 
 export async function sign(
   signerAddress: string,
-  tx: amino.StdTx | ProtoTx,
+  tx: StdTxWithMsgs | ProtoTx,
   signer: OfflineSigner,
   { accountNumber, sequence, chainId }: SignerData,
   prefix = "cosmos" // should ideally come from signer, but not exposed by cosmjs at this time
@@ -149,14 +142,13 @@ const scrubRoute = (x: Route) => {
 
 const scrubRoutes = (x: Route[]) => x.map(scrubRoute)
 
-function parse_legacy_tx_format(tx: AgnosticStdTx): ProtoTx {
-  const msgOrMsgs = tx.msg ?? tx.msgs
-  if(!msgOrMsgs) throw new Error('msgs array improperly formatted!')
+function parse_legacy_tx_format(tx:  StdTxWithMsgs): ProtoTx {
+  if(!tx.msgs) throw new Error('msgs array improperly formatted!')
 
-  if (msgOrMsgs.length !== 1) throw new Error('multiple msgs not supported!')
+  if (tx.msgs.length !== 1) throw new Error('multiple msgs not supported!')
 
   return {
-    ...convertLegacyMsg(msgOrMsgs[0]),
+    ...convertLegacyMsg(tx.msgs[0]),
     fee: {
       amount: scrubCoins(tx.fee.amount),
       gas: tx.fee.gas
