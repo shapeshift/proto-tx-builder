@@ -7,7 +7,7 @@
     "amount": [],
     "gas": "250000"
   },
-  "msg": [
+  "msgs": [
     {
       "type": "cosmos-sdk/MsgUndelegate",
       "value": {

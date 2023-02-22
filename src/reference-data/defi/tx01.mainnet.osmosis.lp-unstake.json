@@ -13,7 +13,7 @@
     "gas": "290000"
   },
   "memo": "",
-  "msg": [
+  "msgs": [
     {
       "type": "osmosis/lockup/begin-unlock-period-lock",
       "value": {

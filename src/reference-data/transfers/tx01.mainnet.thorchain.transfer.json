@@ -3,7 +3,7 @@
   "chain_id": "thorchain-mainnet-v1",
   "account_number": "2722",
   "sequence": "11",
-  "msg": [
+  "msgs": [
     {
       "type": "thorchain/MsgSend",
       "value": {

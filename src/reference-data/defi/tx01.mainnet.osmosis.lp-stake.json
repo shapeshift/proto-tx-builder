@@ -13,7 +13,7 @@
     "gas": "140000"
   },
   "memo": "",
-  "msg": [
+  "msgs": [
     {
       "type": "osmosis/lockup/lock-tokens",
       "value": {
