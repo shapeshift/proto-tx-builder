@@ -18,9 +18,9 @@
       "type": "osmosis/gamm/exit-pool",
       "value": {
         "sender": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq",
-        "poolId": "1",
-        "shareInAmount": "78719426289889034",
-        "tokenOutMins": [
+        "pool_id": "1",
+        "share_in_amount": "78719426289889034",
+        "token_out_mins": [
           {
             "denom": "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
             "amount": "1532"

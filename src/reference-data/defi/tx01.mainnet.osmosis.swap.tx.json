@@ -146,15 +146,15 @@
           "sender": "osmo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7g9ypmq",
           "routes": [
             {
-              "poolId": "1",
-              "tokenOutDenom": "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+              "pool_id": "1",
+              "token_out_denom": "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
             }
           ],
-          "tokenIn": {
+          "token_in": {
             "denom": "uosmo",
             "amount": "65000"
           },
-          "tokenOutMinAmount": "8204"
+          "token_out_min_amount": "8204"
         }
       ],
       "memo": "",
