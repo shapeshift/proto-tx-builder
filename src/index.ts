@@ -38,7 +38,8 @@ export interface ProtoTx {
 }
 
 const isProtoTx = (tx: unknown): tx is ProtoTx => {
-  const message = (tx as ProtoTx).messages[0]
+  const message = (tx as ProtoTx).messages?.[0]
+  if (!message) return false
   return 'typeUrl' in message
 }
 
@@ -94,9 +95,8 @@ export async function sign(
   myRegistry.register('/types.MsgDeposit', codecs.thorchain_types.MsgDeposit)
 
   const clientOffline = await SigningStargateClient.offline(signer, { registry: myRegistry, aminoTypes: myAminoTypes, })
-  const txMessages = getMessages(tx)
 
-  if (txMessages.length !== 1) throw new Error('support for single message signing only')
+  if (getMessages(tx).length !== 1) throw new Error('support for single message signing only')
 
   const { messages, fee, memo } = (() => {
     if (isProtoTx(tx)) {
