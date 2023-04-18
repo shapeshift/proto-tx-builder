@@ -19,19 +19,19 @@ import { toAccAddress } from '@cosmjs/stargate/build/queryclient/utils'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 import BN from 'bn.js'
-import { osmosis, thorchain } from './amino'
+import { arkeo, osmosis, thorchain } from './amino'
 import * as codecs from './proto'
 
 type AgnosticStdTx = Omit<amino.StdTx, 'msg'> &
   (
     | {
-        readonly msg?: readonly amino.AminoMsg[]
-        msgs?: never;
-      }
+      readonly msg?: readonly amino.AminoMsg[]
+      msgs?: never;
+    }
     | {
-        readonly msgs?: readonly amino.AminoMsg[]
-        msg: never;
-      }
+      readonly msgs?: readonly amino.AminoMsg[]
+      msg: never;
+    }
   )
 
 export interface ProtoTx {
@@ -72,10 +72,22 @@ export async function sign(
     ...createStakingAminoConverters(prefix),
     ...createVestingAminoConverters(),
     ...thorchain.createAminoConverters(),
-    ...osmosis.createAminoConverters()
+    ...osmosis.createAminoConverters(),
+    ...arkeo.createAminoConverters()
   })
 
   const myRegistry = new Registry(defaultStargateTypes)
+
+  // arkeo
+  myRegistry.register('/arkeo.arkeo.MsgBondProvider', codecs.arkeo.arkeo.MsgBondProvider)
+  myRegistry.register('/arkeo.arkeo.MsgModProvider', codecs.arkeo.arkeo.MsgModProvider)
+  myRegistry.register('/arkeo.arkeo.MsgOpenContract', codecs.arkeo.arkeo.MsgOpenContract)
+  myRegistry.register('/arkeo.arkeo.MsgCloseContract', codecs.arkeo.arkeo.MsgCloseContract)
+  myRegistry.register('/arkeo.arkeo.MsgClaimContractIncome', codecs.arkeo.arkeo.MsgClaimContractIncome)
+  myRegistry.register('/arkeo.claim.MsgClaimEth', codecs.arkeo.claim.MsgClaimEth)
+  myRegistry.register('/arkeo.claim.MsgClaimArkeo', codecs.arkeo.claim.MsgClaimArkeo)
+  myRegistry.register('/arkeo.claim.MsgTransferClaim', codecs.arkeo.claim.MsgTransferClaim)
+  myRegistry.register('/arkeo.claim.MsgAddClaim', codecs.arkeo.claim.MsgAddClaim)
 
   // osmosis
   myRegistry.register('/osmosis.gamm.v1beta1.MsgSwapExactAmountIn', codecs.osmosis.gamm.v1beta1.MsgSwapExactAmountIn)
@@ -151,7 +163,7 @@ const scrubRoutes = (x: Route[]) => x.map(scrubRoute)
 
 function parse_legacy_tx_format(tx: AgnosticStdTx): ProtoTx {
   const msgOrMsgs = tx.msg ?? tx.msgs
-  if(!msgOrMsgs) throw new Error('msgs array improperly formatted!')
+  if (!msgOrMsgs) throw new Error('msgs array improperly formatted!')
 
   if (msgOrMsgs.length !== 1) throw new Error('multiple msgs not supported!')
 
@@ -170,8 +182,8 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
   // switch for each tx type supported
   switch (msg.type) {
     case 'thorchain/MsgSend':
-      if (!msg.value.from_address) throw new Error('Missing from_address in msg')
-      if (!msg.value.to_address) throw new Error('Missing to_address in msg')
+      if (!msg.value.hasOwnProperty('from_address')) throw new Error('Missing from_address in msg')
+      if (!msg.value.hasOwnProperty('to_address')) throw new Error('Missing to_address in msg')
 
       return {
         msg: [{
@@ -224,8 +236,8 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
     case 'cosmos-sdk/MsgSend':
-      if (!msg.value.from_address) throw new Error('Missing from_address in msg')
-      if (!msg.value.to_address) throw new Error('Missing to_address in msg')
+      if (!msg.value.hasOwnProperty('from_address')) throw new Error('Missing from_address in msg')
+      if (!msg.value.hasOwnProperty('to_address')) throw new Error('Missing to_address in msg')
 
       return {
         msg: [{
@@ -238,8 +250,8 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
     case 'cosmos-sdk/MsgDelegate':
-      if (!msg.value.delegator_address) throw new Error('Missing delegator_address in msg')
-      if (!msg.value.validator_address) throw new Error('Missing validator_address in msg')
+      if (!msg.value.hasOwnProperty('delegator_address')) throw new Error('Missing delegator_address in msg')
+      if (!msg.value.hasOwnProperty('validator_address')) throw new Error('Missing validator_address in msg')
 
       return {
         msg: [{
@@ -252,8 +264,8 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
     case 'cosmos-sdk/MsgUndelegate':
-      if (!msg.value.delegator_address) throw new Error('Missing delegator_address in msg')
-      if (!msg.value.validator_address) throw new Error('Missing validator_address in msg')
+      if (!msg.value.hasOwnProperty('delegator_address')) throw new Error('Missing delegator_address in msg')
+      if (!msg.value.hasOwnProperty('validator_address')) throw new Error('Missing validator_address in msg')
 
       return {
         msg: [{
@@ -266,9 +278,9 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
     case 'cosmos-sdk/MsgBeginRedelegate':
-      if (!msg.value.delegator_address) throw new Error('Missing delegator_address in msg')
-      if (!msg.value.validator_src_address) throw new Error('Missing validator_src_address in msg')
-      if (!msg.value.validator_dst_address) throw new Error('Missing validator_dst_address in msg')
+      if (!msg.value.hasOwnProperty('delegator_address')) throw new Error('Missing delegator_address in msg')
+      if (!msg.value.hasOwnProperty('validator_src_address')) throw new Error('Missing validator_src_address in msg')
+      if (!msg.value.hasOwnProperty('validator_dst_address')) throw new Error('Missing validator_dst_address in msg')
 
       return {
         msg: [{
@@ -282,8 +294,8 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
     case 'cosmos-sdk/MsgWithdrawDelegationReward':
-      if (!msg.value.delegator_address) throw new Error('Missing delegator_address in msg')
-      if (!msg.value.validator_address) throw new Error('Missing validator_address in msg')
+      if (!msg.value.hasOwnProperty('delegator_address')) throw new Error('Missing delegator_address in msg')
+      if (!msg.value.hasOwnProperty('validator_address')) throw new Error('Missing validator_address in msg')
 
       return {
         msg: [{
@@ -296,11 +308,11 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
     case 'cosmos-sdk/MsgTransfer':
-      if (!msg.value.receiver) throw new Error('Missing receiver in msg')
-      if (!msg.value.sender) throw new Error('Missing sender in msg')
-      if (!msg.value.source_channel) throw new Error('Missing source_channel in msg')
-      if (!msg.value.source_port) throw new Error('Missing source_port in msg')
-      if (!msg.value.timeout_height.revision_height)
+      if (!msg.value.hasOwnProperty('receiver')) throw new Error('Missing receiver in msg')
+      if (!msg.value.hasOwnProperty('sender')) throw new Error('Missing sender in msg')
+      if (!msg.value.hasOwnProperty('source_channel')) throw new Error('Missing source_channel in msg')
+      if (!msg.value.hasOwnProperty('source_port')) throw new Error('Missing source_port in msg')
+      if (!msg.value.hasOwnProperty('timeout_height').revision_height)
         throw new Error('Missing revision_height in msg value.timeout_height')
 
       return {
@@ -321,9 +333,9 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
     case 'osmosis/gamm/swap-exact-amount-in':
-      if (!msg.value.sender) throw new Error('Missing sender in msg')
-      if (!msg.value.token_in) throw new Error('Missing token_in in msg')
-      if (!msg.value.token_out_min_amount) throw new Error('Missing token_out_min_amount in msg')
+      if (!msg.value.hasOwnProperty('sender')) throw new Error('Missing sender in msg')
+      if (!msg.value.hasOwnProperty('token_in')) throw new Error('Missing token_in in msg')
+      if (!msg.value.hasOwnProperty('token_out_min_amount')) throw new Error('Missing token_out_min_amount in msg')
       if (msg.value.routes.length !== 1) throw new Error('bad routes length')
 
       return {
@@ -338,28 +350,28 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
     case 'osmosis/gamm/join-swap-extern-amount-in':
-        if (!msg.value.pool_id) throw new Error('Missing pool_id in msg')
-        if (!msg.value.sender) throw new Error('Missing sender in msg')
-        if (!msg.value.share_out_min_amount) throw new Error('Missing share_out_min_amount in msg')
-        if (!msg.value.tokenIn) throw new Error('Missing tokenIn in msg')
-  
-        return {
-          msg: [{
-            typeUrl: '/osmosis.gamm.v1beta1.MsgJoinSwapExternAmountIn',
-            value: {
-              poolId: msg.value.pool_id,
-              sender: msg.value.sender,
-              shareOutMinAmount: msg.value.share_out_min_amount,
-              tokenIn: scrubCoin(msg.value.token_in),
-              
-            }
-          }]
-        }
+      if (!msg.value.hasOwnProperty('pool_id')) throw new Error('Missing pool_id in msg')
+      if (!msg.value.hasOwnProperty('sender')) throw new Error('Missing sender in msg')
+      if (!msg.value.hasOwnProperty('share_out_min_amount')) throw new Error('Missing share_out_min_amount in msg')
+      if (!msg.value.hasOwnProperty('tokenIn')) throw new Error('Missing tokenIn in msg')
+
+      return {
+        msg: [{
+          typeUrl: '/osmosis.gamm.v1beta1.MsgJoinSwapExternAmountIn',
+          value: {
+            poolId: msg.value.pool_id,
+            sender: msg.value.sender,
+            shareOutMinAmount: msg.value.share_out_min_amount,
+            tokenIn: scrubCoin(msg.value.token_in),
+
+          }
+        }]
+      }
     case 'osmosis/gamm/join-pool':
-      if (!msg.value.sender) throw new Error('Missing sender in msg')
-      if (!msg.value.pool_id) throw new Error('Missing pool_id in msg')
-      if (!msg.value.share_out_amount) throw new Error('Missing share_out_amount in msg')
-      if (msg.value.token_in_maxs.length  !== 2) throw new Error('Bad token_in_maxs length')
+      if (!msg.value.hasOwnProperty('sender')) throw new Error('Missing sender in msg')
+      if (!msg.value.hasOwnProperty('pool_id')) throw new Error('Missing pool_id in msg')
+      if (!msg.value.hasOwnProperty('share_out_amount')) throw new Error('Missing share_out_amount in msg')
+      if (msg.value.token_in_maxs.length !== 2) throw new Error('Bad token_in_maxs length')
 
       return {
         msg: [{
@@ -373,9 +385,9 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
     case 'osmosis/gamm/exit-pool':
-      if (!msg.value.sender) throw new Error('Missing sender in msg')
-      if (!msg.value.pool_id) throw new Error('Missing pool_id in msg')
-      if (!msg.value.share_in_amount) throw new Error('Missing share_in_amount in msg')
+      if (!msg.value.hasOwnProperty('sender')) throw new Error('Missing sender in msg')
+      if (!msg.value.hasOwnProperty('pool_id')) throw new Error('Missing pool_id in msg')
+      if (!msg.value.hasOwnProperty('share_in_amount')) throw new Error('Missing share_in_amount in msg')
       if (msg.value.token_out_mins.length !== 2) throw new Error('Bad token_out_mins length')
 
       return {
@@ -390,8 +402,8 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
     case 'osmosis/lockup/lock-tokens': {
-      if (!msg.value.owner) throw new Error('Missing owner in msg')
-      if (!msg.value.duration) throw new Error('Missing duration in msg')
+      if (!msg.value.hasOwnProperty('owner')) throw new Error('Missing owner in msg')
+      if (!msg.value.hasOwnProperty('duration')) throw new Error('Missing duration in msg')
 
       const duration = new BN(msg.value.duration)
       const nanosPerSecond = new BN("1000000000")
@@ -410,7 +422,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
       }
     }
     case 'osmosis/lockup/begin-unlock-period-lock':
-      if (!msg.value.owner) throw new Error('Missing owner in msg')
+      if (!msg.value.hasOwnProperty('owner')) throw new Error('Missing owner in msg')
 
       return {
         msg: [{
@@ -421,8 +433,8 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
     case 'osmosis/lockup/begin-unlock-by-id':
-      if (!msg.value.id) throw new Error('Missing id in msg')
-      if (!msg.value.owner) throw new Error('Missing owner in msg')
+      if (!msg.value.hasOwnProperty('id')) throw new Error('Missing id in msg')
+      if (!msg.value.hasOwnProperty('owner')) throw new Error('Missing owner in msg')
 
       return {
         msg: [{
@@ -430,6 +442,177 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
           value: {
             owner: msg.value.owner,
             id: msg.value.id
+          }
+        }]
+      }
+    case 'arkeo/arkeo/MsgBondProvider':
+      if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
+      if (!msg.value.hasOwnProperty('provider')) throw new Error('Missing provider in msg')
+      if (!msg.value.hasOwnProperty('service')) throw new Error('Missing service in msg')
+      if (!msg.value.hasOwnProperty('bond')) throw new Error('Missing bond in msg')
+
+      return {
+        msg: [{
+          typeUrl: '/arkeo.arkeo.MsgBondProvider',
+          value: {
+            creator: msg.value.creator,
+            provider: msg.value.provider,
+            service: msg.value.creator,
+            bond: msg.value.bond,
+          }
+        }]
+      }
+    case 'arkeo/arkeo/MsgModProvider':
+      if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
+      if (!msg.value.hasOwnProperty('provider')) throw new Error('Missing provider in msg')
+      if (!msg.value.hasOwnProperty('service')) throw new Error('Missing service in msg')
+      if (!msg.value.hasOwnProperty('metadata_uri')) throw new Error('Missing metadata_uri in msg')
+      if (!msg.value.hasOwnProperty('metadata_nonce')) throw new Error('Missing metadata_nonce in msg')
+      if (!msg.value.hasOwnProperty('status')) throw new Error(`Missing status in msg ${JSON.stringify(msg, null, 2)}`)
+      if (!msg.value.hasOwnProperty('min_contract_duration')) throw new Error('Missing min_contract_duration in msg')
+      if (!msg.value.hasOwnProperty('max_contract_duration')) throw new Error('Missing max_contract_duration in msg')
+      if (!msg.value.hasOwnProperty('subscription_rate')) throw new Error('Missing subscription_rate in msg')
+      if (!msg.value.hasOwnProperty('pay_as_you_go_rate')) throw new Error('Missing pay_as_you_go_rate in msg')
+      if (!msg.value.hasOwnProperty('settlement_duration')) throw new Error('Missing settlement_duration in msg')
+
+      return {
+        msg: [{
+          typeUrl: '/arkeo.arkeo.MsgModProvider',
+          value: {
+            creator: msg.value.creator,
+            provider: msg.value.provider,
+            service: msg.value.service,
+            metadataUri: msg.value.metadata_uri,
+            metadataNonce: msg.value.metadata_nonce,
+            status: msg.value.status,
+            minContractDuration: msg.value.min_contract_duration,
+            maxContractDuration: msg.value.max_contract_duration,
+            subscriptionRate: msg.value.subscription_rate,
+            payAsYouGoRate: msg.value.pay_as_you_go_rate,
+            settlementDuration: msg.value.settlement_duration,
+          }
+        }]
+      }
+    case 'arkeo/arkeo/MsgOpenContract':
+      if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
+      if (!msg.value.hasOwnProperty('provider')) throw new Error('Missing provider in msg')
+      if (!msg.value.hasOwnProperty('service')) throw new Error('Missing service in msg')
+      if (!msg.value.hasOwnProperty('client')) throw new Error('Missing client in msg')
+      if (!msg.value.hasOwnProperty('delegate')) throw new Error('Missing delegate in msg')
+      if (!msg.value.hasOwnProperty('contract_type')) throw new Error('Missing contract_type in msg')
+      if (!msg.value.hasOwnProperty('duration')) throw new Error('Missing duration in msg')
+      if (!msg.value.hasOwnProperty('rate')) throw new Error('Missing rate in msg')
+      if (!msg.value.hasOwnProperty('deposit')) throw new Error('Missing deposit in msg')
+      if (!msg.value.hasOwnProperty('settlement_duration')) throw new Error('Missing settlement_duration in msg')
+      if (!msg.value.hasOwnProperty('authorization')) throw new Error('Missing authorization in msg')
+
+      return {
+        msg: [{
+          typeUrl: '/arkeo.arkeo.MsgOpenContract',
+          value: {
+            creator: msg.value.creator,
+            provider: msg.value.provider,
+            service: msg.value.service,
+            client: msg.value.client,
+            delegate: msg.value.delegate,
+            contractType: msg.value.contract_type,
+            duration: msg.value.duration,
+            rate: msg.value.rate,
+            deposit: msg.value.deposit,
+            settlementDuration: msg.value.settlement_duration,
+            authorization: msg.value.authorization
+          }
+        }]
+      }
+
+    case 'arkeo/arkeo/MsgCloseContract':
+      if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
+      if (!msg.value.hasOwnProperty('contract_id')) throw new Error('Missing contract_id in msg')
+
+      return {
+        msg: [{
+          typeUrl: '/arkeo.arkeo.MsgCloseContract',
+          value: {
+            creator: msg.value.creator,
+            contractId: msg.value.contract_id,
+          }
+        }]
+      }
+
+    case 'arkeo/arkeo/MsgClaimContractIncome':
+      if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
+      if (!msg.value.hasOwnProperty('contract_id')) throw new Error('Missing contract_id in msg')
+      if (!msg.value.hasOwnProperty('signature')) throw new Error('Missing signature in msg')
+      if (!msg.value.hasOwnProperty('nonce')) throw new Error('Missing nonce in msg')
+
+      return {
+        msg: [{
+          typeUrl: '/arkeo.arkeo.MsgClaimContractIncome',
+          value: {
+            creator: msg.value.creator,
+            contractId: msg.value.contract_id,
+            signature: msg.value.signature,
+            nonce: msg.value.nonce,
+          }
+        }]
+      }
+
+    case 'arkeo/claim/MsgClaimEth':
+      if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
+      if (!msg.value.hasOwnProperty('eth_address')) throw new Error('Missing eth_address in msg')
+      if (!msg.value.hasOwnProperty('signature')) throw new Error('Missing signature in msg')
+
+      return {
+        msg: [{
+          typeUrl: '/arkeo.claim.MsgClaimEth',
+          value: {
+            creator: msg.value.creator,
+            ethAddress: msg.value.eth_address,
+            signature: msg.value.signature,
+          }
+        }]
+      }
+
+    case 'arkeo/claim/MsgClaimArkeo':
+      if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
+
+      return {
+        msg: [{
+          typeUrl: '/arkeo.claim.MsgClaimArkeo',
+          value: {
+            creator: msg.value.creator,
+          }
+        }]
+      }
+
+    case 'arkeo/claim/MsgTransferClaim':
+      if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
+      if (!msg.value.hasOwnProperty('to_address')) throw new Error('Missing to_address in msg')
+
+      return {
+        msg: [{
+          typeUrl: '/arkeo.claim.MsgTransferClaim',
+          value: {
+            creator: msg.value.creator,
+            toAddress: msg.value.to_address,
+          }
+        }]
+      }
+
+    case 'arkeo/claim/MsgAddClaim':
+      if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
+      if (!msg.value.hasOwnProperty('chain')) throw new Error('Missing chain in msg')
+      if (!msg.value.hasOwnProperty('address')) throw new Error('Missing address in msg')
+      if (!msg.value.hasOwnProperty('amount')) throw new Error('Missing amount in msg')
+
+      return {
+        msg: [{
+          typeUrl: '/arkeo.claim.MsgAddClaim',
+          value: {
+            creator: msg.value.creator,
+            chain: msg.value.chain,
+            address: msg.value.address,
+            amount: msg.value.amount
           }
         }]
       }
