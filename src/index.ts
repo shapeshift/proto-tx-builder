@@ -312,7 +312,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
       if (!msg.value.hasOwnProperty('sender')) throw new Error('Missing sender in msg')
       if (!msg.value.hasOwnProperty('source_channel')) throw new Error('Missing source_channel in msg')
       if (!msg.value.hasOwnProperty('source_port')) throw new Error('Missing source_port in msg')
-      if (!msg.value.hasOwnProperty('timeout_height').revision_height)
+      if (!msg.value.timeout_height.hasOwnProperty('revision_height'))
         throw new Error('Missing revision_height in msg value.timeout_height')
 
       return {
