@@ -1,0 +1,27 @@
+{
+    "signerAddress": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+    "account_number": "95421",
+    "chain_id": "arkeo-1",
+    "fee": {
+        "amount": [
+            {
+                "amount": "2291",
+                "denom": "uarkeo"
+            }
+        ],
+        "gas": "91633"
+    },
+    "memo": "memo",
+    "msg": [
+        {
+            "type": "arkeo/claim/MsgAddClaim",
+            "value": {
+                "creator": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+                "chain": 0,
+                "address": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+                "amount": 21827
+            }
+        }
+    ],
+    "sequence": "90"
+}

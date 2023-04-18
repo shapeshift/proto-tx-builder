@@ -1,0 +1,27 @@
+{
+    "signerAddress": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+    "account_number": "97721",
+    "chain_id": "arkeo-1",
+    "fee": {
+        "amount": [
+            {
+                "amount": "2291",
+                "denom": "uarkeo"
+            }
+        ],
+        "gas": "91633"
+    },
+    "memo": "memo",
+    "msg": [
+        {
+            "type": "arkeo/arkeo/MsgBondProvider",
+            "value": {
+                "creator": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+                "provider": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+                "service": "test-service-string",
+                "bond": "10000"
+            }
+        }
+    ],
+    "sequence": "90"
+}

@@ -10,13 +10,14 @@ const prefixes = {
   osmosis: 'osmo',
   cosmos: 'cosmos',
   thorchain: 'thor',
+  arkeo: 'arkeo',
   // terra: 'terra',
   // kava: 'kava',
   // secret: 'secret'
 } as const
 
 // TODO - combine this with prefixes as a chain config object
-const coinTypes: Record<string, number> = { cosmos: 118, osmosis: 118, thorchain: 931 }
+const coinTypes: Record<string, number> = { arkeo: 118, cosmos: 118, osmosis: 118, thorchain: 931 }
 const defaultCoinType = coinTypes.cosmos
 
 // TODO - options argument with acceess to full path, or change prefixes to a general config obj per chain
