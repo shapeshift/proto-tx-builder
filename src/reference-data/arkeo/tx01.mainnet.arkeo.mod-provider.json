@@ -1,0 +1,44 @@
+{
+  "signerAddress": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+  "account_number": "97721",
+  "chain_id": "arkeo-1",
+  "fee": {
+    "amount": [
+      {
+        "amount": "2291",
+        "denom": "uarkeo"
+      }
+    ],
+    "gas": "91633"
+  },
+  "memo": "memo",
+  "msg": [
+    {
+      "type": "arkeo/ModProvider",
+      "value": {
+        "creator": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+        "provider": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+        "service": "test-service-string",
+        "metadata_uri": "https://www.example.com",
+        "metadata_nonce": 69,
+        "status": 0,
+        "min_contract_duration": 420,
+        "max_contract_duration": 420,
+        "subscription_rate": [
+          {
+            "amount": "1200",
+            "denom": "uarkeo"
+          }
+        ],
+        "pay_as_you_go_rate": [
+          {
+            "amount": "1542",
+            "denom": "uarkeo"
+          }
+        ],
+        "settlement_duration": 94
+      }
+    }
+  ],
+  "sequence": "90"
+}

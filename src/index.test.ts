@@ -10,13 +10,14 @@ const prefixes = {
   osmosis: 'osmo',
   cosmos: 'cosmos',
   thorchain: 'thor',
+  arkeo: 'arkeo',
   // terra: 'terra',
   // kava: 'kava',
   // secret: 'secret'
 } as const
 
 // TODO - combine this with prefixes as a chain config object
-const coinTypes: Record<string, number> = { cosmos: 118, osmosis: 118, thorchain: 931 }
+const coinTypes: Record<string, number> = { arkeo: 118, cosmos: 118, osmosis: 118, thorchain: 931 }
 const defaultCoinType = coinTypes.cosmos
 
 // TODO - options argument with acceess to full path, or change prefixes to a general config obj per chain
@@ -31,10 +32,10 @@ async function makeReferenceSeedSigner(prefix: string, coinType?: number) {
           Slip10RawIndex.hardened(coinType),
           Slip10RawIndex.hardened(0),
           Slip10RawIndex.normal(0),
-          Slip10RawIndex.normal(0)
-        ]
+          Slip10RawIndex.normal(0),
+        ],
       ],
-      prefix
+      prefix,
     }
   )
   const accts = await w.getAccounts()
@@ -50,24 +51,18 @@ describe('signs Tendermint transactions', () => {
   for (const signedJsonPath of glob.sync('src/reference-data/**/*.signed.json')) {
     const unsignedJsonPath = signedJsonPath.replace(/\.signed\.json$/, '.json')
     const signedJsonBasename = path.basename(signedJsonPath)
-    const signedJsonPathSegments = /^([^.]+)\.([^.]+)\.([^.]+)\.(.+)\.signed\.json$/.exec(
-      signedJsonBasename
-    )
-    if (!signedJsonPathSegments)
-      throw new Error(`test name doesn't match pattern: ${signedJsonBasename}`)
+    const signedJsonPathSegments = /^([^.]+)\.([^.]+)\.([^.]+)\.(.+)\.signed\.json$/.exec(signedJsonBasename)
+    if (!signedJsonPathSegments) throw new Error(`test name doesn't match pattern: ${signedJsonBasename}`)
 
     const [, txNum, txNet, txAsset, txType] = signedJsonPathSegments
-    it(`signs a ${txNet} ${txAsset} reference ${txType.replace(
-      /[.-]/,
-      ' '
-    )} transaction (${txNum})`, async () => {
+    it(`signs a ${txNet} ${txAsset} reference ${txType.replace(/[.-]/, ' ')} transaction (${txNum})`, async () => {
       if (!(txAsset in signers)) throw new Error(`unrecognized asset type '${txAsset}'`)
       const signer = await signers[txAsset as keyof typeof signers]
 
       // get reference data
       const referenceTx = JSON.parse(
         fs.readFileSync(unsignedJsonPath, {
-          encoding: 'utf8'
+          encoding: 'utf8',
         })
       )
       const referenceTxSigned = JSON.parse(fs.readFileSync(signedJsonPath, { encoding: 'utf8' }))
@@ -75,16 +70,11 @@ describe('signs Tendermint transactions', () => {
       expect(referenceTx).toBeTruthy()
       expect(referenceTxSigned).toBeTruthy()
 
-      const result = await sign(
-        referenceTx.signerAddress,
-        referenceTx,
-        signer,
-        {
-          sequence: referenceTx.sequence,
-          accountNumber: referenceTx.account_number,
-          chainId: referenceTx.chain_id
-        }
-      )
+      const result = await sign(referenceTx.signerAddress, referenceTx, signer, {
+        sequence: referenceTx.sequence,
+        accountNumber: referenceTx.account_number,
+        chainId: referenceTx.chain_id,
+      })
 
       expect(result.serialized).toBe(referenceTxSigned.serialized)
       expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0])
