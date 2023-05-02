@@ -277,7 +277,7 @@ export function createAminoConverters(): AminoConverters {
       }),
     },
     '/arkeo.claim.MsgClaimEth': {
-      aminoType: 'claim/MsgClaimEth',
+      aminoType: 'claim/ClaimEth',
       toAmino: ({ creator, ethAddress, signature }: codecs.arkeo.claim.MsgClaimEth): AminoMsgClaimEth['value'] => ({
         creator: toBech32('arkeo', creator),
         eth_address: ethAddress,
@@ -290,7 +290,7 @@ export function createAminoConverters(): AminoConverters {
       }),
     },
     '/arkeo.claim.MsgClaimArkeo': {
-      aminoType: 'claim/MsgClaimArkeo',
+      aminoType: 'claim/ClaimArkeo',
       toAmino: ({ creator }: codecs.arkeo.claim.MsgClaimArkeo): AminoMsgClaimArkeo['value'] => ({
         creator: toBech32('arkeo', creator),
       }),
@@ -299,7 +299,7 @@ export function createAminoConverters(): AminoConverters {
       }),
     },
     '/arkeo.claim.MsgTransferClaim': {
-      aminoType: 'claim/MsgTransferClaim',
+      aminoType: 'claim/TransferClaim',
       toAmino: ({ creator, toAddress }: codecs.arkeo.claim.MsgTransferClaim): AminoMsgTransferClaim['value'] => ({
         creator: toBech32('arkeo', creator),
         to_address: toBech32('arkeo', toAddress),
@@ -310,7 +310,7 @@ export function createAminoConverters(): AminoConverters {
       }),
     },
     '/arkeo.claim.MsgAddClaim': {
-      aminoType: 'claim/MsgAddClaim',
+      aminoType: 'claim/AddClaim',
       toAmino: ({ creator, chain, address, amount }: codecs.arkeo.claim.MsgAddClaim): AminoMsgAddClaim['value'] => ({
         creator: toBech32('arkeo', creator),
         chain: chain,
