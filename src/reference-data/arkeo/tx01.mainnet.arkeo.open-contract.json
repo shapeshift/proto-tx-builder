@@ -1,37 +1,39 @@
 {
-    "signerAddress": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
-    "account_number": "97721",
-    "chain_id": "arkeo-1",
-    "fee": {
-        "amount": [
-            {
-                "amount": "2291",
-                "denom": "uarkeo"
-            }
-        ],
-        "gas": "91633"
-    },
-    "memo": "memo",
-    "msg": [
-        {
-            "type": "arkeo/arkeo/MsgOpenContract",
-            "value": {
-                "creator": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
-                "provider": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
-                "service": "test-service-string",
-                "client": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
-                "delegate": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
-                "contract_type": 0,
-                "duration": 0,
-                "rate": {
-                    "amount": "354",
-                    "denom": "uarkeo"
-                },
-                "deposit": "1000",
-                "settlement_duration": 94,
-                "authorization": 0
-            }
-        }
+  "signerAddress": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+  "account_number": "97721",
+  "chain_id": "arkeo-1",
+  "fee": {
+    "amount": [
+      {
+        "amount": "2291",
+        "denom": "uarkeo"
+      }
     ],
-    "sequence": "90"
+    "gas": "91633"
+  },
+  "memo": "memo",
+  "msg": [
+    {
+      "type": "arkeo/OpenContract",
+      "value": {
+        "creator": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+        "provider": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+        "service": "test-service-string",
+        "client": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+        "delegate": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+        "contract_type": 0,
+        "duration": 0,
+        "rate": [
+          {
+            "amount": "354",
+            "denom": "uarkeo"
+          }
+        ],
+        "deposit": "1000",
+        "settlement_duration": 94,
+        "authorization": 0
+      }
+    }
+  ],
+  "sequence": "90"
 }

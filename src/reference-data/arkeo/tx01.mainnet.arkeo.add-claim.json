@@ -14,7 +14,7 @@
     "memo": "memo",
     "msg": [
         {
-            "type": "arkeo/claim/MsgAddClaim",
+            "type": "claim/AddClaim",
             "value": {
                 "creator": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
                 "chain": 0,

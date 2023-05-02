@@ -14,7 +14,7 @@
     "memo": "memo",
     "msg": [
         {
-            "type": "arkeo/arkeo/MsgBondProvider",
+            "type": "arkeo/BondProvider",
             "value": {
                 "creator": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
                 "provider": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
