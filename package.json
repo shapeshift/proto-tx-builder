@@ -41,6 +41,21 @@
     "cosmjs-types": "^0.5.1",
     "google-protobuf": "^3.17.0",
     "osmojs": "^0.37.0"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "singleQuote": true,
+    "semi": false,
+    "overrides": [
+      {
+        "files": [
+          "*.json"
+        ],
+        "options": {
+          "singleQuote": false
+        }
+      }
+    ]
   }
 }
 
