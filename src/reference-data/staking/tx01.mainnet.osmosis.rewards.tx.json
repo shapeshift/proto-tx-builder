@@ -88,9 +88,7 @@
         "granter": ""
       }
     },
-    "signatures": [
-      "EAKG30owBZpShRMjQ3EjimzLdo4K2lC93BhXe/gf/RBoxQaXQ6KshKUhpx7BM3YYvfNZGwWyF6gg3qqqbGTKbw=="
-    ]
+    "signatures": ["EAKG30owBZpShRMjQ3EjimzLdo4K2lC93BhXe/gf/RBoxQaXQ6KshKUhpx7BM3YYvfNZGwWyF6gg3qqqbGTKbw=="]
   },
   "timestamp": "2022-02-03T23:55:36Z"
 }

@@ -1,26 +1,26 @@
 {
-    "signerAddress": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
-    "account_number": "97721",
-    "chain_id": "arkeo-1",
-    "fee": {
-        "amount": [
-            {
-                "amount": "2291",
-                "denom": "uarkeo"
-            }
-        ],
-        "gas": "91633"
-    },
-    "memo": "memo",
-    "msg": [
-        {
-            "type": "claim/ClaimEth",
-            "value": {
-                "creator": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
-                "eth_address": "0x95222290dd7278aa3ddd389cc1e1d165cc4bafe5",
-                "signature": "qCgcA/DWCU04nmbvPyXNRx6yUGVzIgY8deDoenNmEcVKfakIzdKJmBLGKEEJEsS676aN6c6DzXfOKIS+YGYR8g=="
-            }
-        }
+  "signerAddress": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+  "account_number": "97721",
+  "chain_id": "arkeo-1",
+  "fee": {
+    "amount": [
+      {
+        "amount": "2291",
+        "denom": "uarkeo"
+      }
     ],
-    "sequence": "90"
+    "gas": "91633"
+  },
+  "memo": "memo",
+  "msg": [
+    {
+      "type": "claim/ClaimEth",
+      "value": {
+        "creator": "arkeo15cenya0tr7nm3tz2wn3h3zwkht2rxrq7r7z5sh",
+        "eth_address": "0x95222290dd7278aa3ddd389cc1e1d165cc4bafe5",
+        "signature": "qCgcA/DWCU04nmbvPyXNRx6yUGVzIgY8deDoenNmEcVKfakIzdKJmBLGKEEJEsS676aN6c6DzXfOKIS+YGYR8g=="
+      }
+    }
+  ],
+  "sequence": "90"
 }
