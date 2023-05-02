@@ -312,8 +312,9 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
       if (!msg.value.hasOwnProperty('sender')) throw new Error('Missing sender in msg')
       if (!msg.value.hasOwnProperty('source_channel')) throw new Error('Missing source_channel in msg')
       if (!msg.value.hasOwnProperty('source_port')) throw new Error('Missing source_port in msg')
-      if (!msg.value.timeout_height.hasOwnProperty('revision_height'))
-        throw new Error('Missing revision_height in msg value.timeout_height')
+      if (!msg.value.hasOwnProperty('timeout_height')) throw new Error('Missing timeout_height in msg')
+      if (!msg.value.timeout_height.hasOwnProperty('revision_height')) throw new Error('Missing timeout_height.revision_height in msg')
+      if (!msg.value.timeout_height.hasOwnProperty('revision_number')) throw new Error('Missing timeout_height.revision_number in msg')
 
       return {
         msg: [{
@@ -445,7 +446,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
           }
         }]
       }
-    case 'arkeo/arkeo/MsgBondProvider':
+    case 'arkeo/BondProvider':
       if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
       if (!msg.value.hasOwnProperty('provider')) throw new Error('Missing provider in msg')
       if (!msg.value.hasOwnProperty('service')) throw new Error('Missing service in msg')
@@ -457,18 +458,17 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
           value: {
             creator: msg.value.creator,
             provider: msg.value.provider,
-            service: msg.value.creator,
+            service: msg.value.service,            
             bond: msg.value.bond,
           }
         }]
       }
-    case 'arkeo/arkeo/MsgModProvider':
+    case 'arkeo/ModProvider':
       if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
       if (!msg.value.hasOwnProperty('provider')) throw new Error('Missing provider in msg')
       if (!msg.value.hasOwnProperty('service')) throw new Error('Missing service in msg')
       if (!msg.value.hasOwnProperty('metadata_uri')) throw new Error('Missing metadata_uri in msg')
-      if (!msg.value.hasOwnProperty('metadata_nonce')) throw new Error('Missing metadata_nonce in msg')
-      if (!msg.value.hasOwnProperty('status')) throw new Error(`Missing status in msg ${JSON.stringify(msg, null, 2)}`)
+      if (!msg.value.hasOwnProperty('status')) throw new Error(`Missing status in msg`)
       if (!msg.value.hasOwnProperty('min_contract_duration')) throw new Error('Missing min_contract_duration in msg')
       if (!msg.value.hasOwnProperty('max_contract_duration')) throw new Error('Missing max_contract_duration in msg')
       if (!msg.value.hasOwnProperty('subscription_rate')) throw new Error('Missing subscription_rate in msg')
@@ -487,13 +487,13 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
             status: msg.value.status,
             minContractDuration: msg.value.min_contract_duration,
             maxContractDuration: msg.value.max_contract_duration,
-            subscriptionRate: msg.value.subscription_rate,
-            payAsYouGoRate: msg.value.pay_as_you_go_rate,
+            subscriptionRate: scrubCoins(msg.value.subscription_rate),
+            payAsYouGoRate: scrubCoins(msg.value.pay_as_you_go_rate),            
             settlementDuration: msg.value.settlement_duration,
           }
         }]
       }
-    case 'arkeo/arkeo/MsgOpenContract':
+    case 'arkeo/OpenContract':
       if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
       if (!msg.value.hasOwnProperty('provider')) throw new Error('Missing provider in msg')
       if (!msg.value.hasOwnProperty('service')) throw new Error('Missing service in msg')
@@ -517,7 +517,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
             delegate: msg.value.delegate,
             contractType: msg.value.contract_type,
             duration: msg.value.duration,
-            rate: msg.value.rate,
+            rate: scrubCoins(msg.value.rate),            
             deposit: msg.value.deposit,
             settlementDuration: msg.value.settlement_duration,
             authorization: msg.value.authorization
@@ -525,7 +525,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
 
-    case 'arkeo/arkeo/MsgCloseContract':
+    case 'arkeo/CloseContract':
       if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
       if (!msg.value.hasOwnProperty('contract_id')) throw new Error('Missing contract_id in msg')
 
@@ -539,7 +539,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
 
-    case 'arkeo/arkeo/MsgClaimContractIncome':
+    case 'arkeo/ClaimContractIncome':
       if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
       if (!msg.value.hasOwnProperty('contract_id')) throw new Error('Missing contract_id in msg')
       if (!msg.value.hasOwnProperty('signature')) throw new Error('Missing signature in msg')
@@ -557,7 +557,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
 
-    case 'arkeo/claim/MsgClaimEth':
+    case 'claim/ClaimEth':
       if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
       if (!msg.value.hasOwnProperty('eth_address')) throw new Error('Missing eth_address in msg')
       if (!msg.value.hasOwnProperty('signature')) throw new Error('Missing signature in msg')
@@ -573,7 +573,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
 
-    case 'arkeo/claim/MsgClaimArkeo':
+    case 'claim/ClaimArkeo':
       if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
 
       return {
@@ -585,7 +585,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
 
-    case 'arkeo/claim/MsgTransferClaim':
+    case 'claim/TransferClaim':
       if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
       if (!msg.value.hasOwnProperty('to_address')) throw new Error('Missing to_address in msg')
 
@@ -599,7 +599,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         }]
       }
 
-    case 'arkeo/claim/MsgAddClaim':
+    case 'claim/AddClaim':
       if (!msg.value.hasOwnProperty('creator')) throw new Error('Missing creator in msg')
       if (!msg.value.hasOwnProperty('chain')) throw new Error('Missing chain in msg')
       if (!msg.value.hasOwnProperty('address')) throw new Error('Missing address in msg')

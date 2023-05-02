@@ -9,7 +9,7 @@ import { Chain } from '../../proto/generated/arkeo/arkeo.claim/types/arkeo/claim
 
 
 export interface AminoMsgBondProvider extends AminoMsg {
-    readonly type: 'arkeo/MsgBondProvider',
+    readonly type: 'arkeo/BondProvider',
     readonly value: {
         readonly creator: string,
         readonly provider: string,
@@ -19,7 +19,7 @@ export interface AminoMsgBondProvider extends AminoMsg {
 }
 
 export interface AminoMsgModProvider extends AminoMsg {
-    readonly type: 'arkeo/MsgModProvider',
+    readonly type: 'arkeo/ModProvider',
     readonly value: {
         readonly creator: string,
         readonly provider: string,
@@ -36,7 +36,7 @@ export interface AminoMsgModProvider extends AminoMsg {
 }
 
 export interface AminoMsgOpenContract extends AminoMsg {
-    readonly type: 'arkeo/MsgOpenContract',
+    readonly type: 'arkeo/OpenContract',
     readonly value: {
         readonly creator: string,
         readonly provider: string,
@@ -53,7 +53,7 @@ export interface AminoMsgOpenContract extends AminoMsg {
 }
 
 export interface AminoMsgCloseContract extends AminoMsg {
-    readonly type: 'arkeo/MsgCloseContract',
+    readonly type: 'arkeo/CloseContract',
     readonly value: {
         readonly creator: string,
         readonly contract_id: number,
@@ -61,7 +61,7 @@ export interface AminoMsgCloseContract extends AminoMsg {
 }
 
 export interface AminoMsgClaimContractIncome extends AminoMsg {
-    readonly type: 'arkeo/MsgClaimContractIncome',
+    readonly type: 'arkeo/ClaimContractIncome',
     readonly value: {
         readonly creator: string,
         readonly contract_id: number,
@@ -71,7 +71,7 @@ export interface AminoMsgClaimContractIncome extends AminoMsg {
 }
 
 export interface AminoMsgClaimEth extends AminoMsg {
-    readonly type: 'arkeo/MsgClaimEth',
+    readonly type: 'claim/ClaimEth',
     readonly value: {
         readonly creator: string,
         readonly eth_address: string,
@@ -80,14 +80,14 @@ export interface AminoMsgClaimEth extends AminoMsg {
 }
 
 export interface AminoMsgClaimArkeo extends AminoMsg {
-    readonly type: 'arkeo/MsgClaimArkeo',
+    readonly type: 'claim/ClaimArkeo',
     readonly value: {
         readonly creator: string,
     },
 }
 
 export interface AminoMsgTransferClaim extends AminoMsg {
-    readonly type: 'arkeo/MsgTransferClaim',
+    readonly type: 'claim/TransferClaim',
     readonly value: {
         readonly creator: string,
         readonly to_address: string,
@@ -95,7 +95,7 @@ export interface AminoMsgTransferClaim extends AminoMsg {
 }
 
 export interface AminoMsgAddClaim extends AminoMsg {
-    readonly type: 'arkeo/MsgAddClaim',
+    readonly type: 'claim/AddClaim',
     readonly value: {
         readonly creator: string,
         readonly chain: Chain,
@@ -107,7 +107,7 @@ export interface AminoMsgAddClaim extends AminoMsg {
 export function createAminoConverters(): AminoConverters {
     return {
         '/arkeo.arkeo.MsgBondProvider': {
-            aminoType: 'arkeo/arkeo/MsgBondProvider',
+            aminoType: 'arkeo/BondProvider',
             toAmino: ({
                 creator,
                 provider,
@@ -132,7 +132,7 @@ export function createAminoConverters(): AminoConverters {
             }),
         },
         '/arkeo.arkeo.MsgModProvider': {
-            aminoType: 'arkeo/arkeo/MsgModProvider',
+            aminoType: 'arkeo/ModProvider',
             toAmino: ({
                 creator,
                 provider,
@@ -185,7 +185,7 @@ export function createAminoConverters(): AminoConverters {
             }),
         },
         '/arkeo.arkeo.MsgOpenContract': {
-            aminoType: 'arkeo/arkeo/MsgOpenContract',
+            aminoType: 'arkeo/OpenContract',
             toAmino: ({
                 creator,
                 provider,
@@ -238,7 +238,7 @@ export function createAminoConverters(): AminoConverters {
             }),
         },
         '/arkeo.arkeo.MsgCloseContract': {
-            aminoType: 'arkeo/arkeo/MsgCloseContract',
+            aminoType: 'arkeo/CloseContract',
             toAmino: ({
                 creator,
                 contractId
@@ -255,7 +255,7 @@ export function createAminoConverters(): AminoConverters {
             }),
         },
         '/arkeo.arkeo.MsgClaimContractIncome': {
-            aminoType: 'arkeo/arkeo/MsgClaimContractIncome',
+            aminoType: 'arkeo/ClaimContractIncome',
             toAmino: ({
                 creator,
                 contractId,
@@ -279,8 +279,8 @@ export function createAminoConverters(): AminoConverters {
                 nonce: nonce,
             }),
         },
-        '/arkeo.arkeo.MsgClaimEth': {
-            aminoType: 'arkeo/claim/MsgClaimEth',
+        '/arkeo.claim.MsgClaimEth': {
+            aminoType: 'claim/MsgClaimEth',
             toAmino: ({
                 creator,
                 ethAddress,
@@ -300,8 +300,8 @@ export function createAminoConverters(): AminoConverters {
                 signature: signature,
             }),
         },
-        '/arkeo.arkeo.MsgClaimArkeo': {
-            aminoType: 'arkeo/claim/MsgClaimArkeo',
+        '/arkeo.claim.MsgClaimArkeo': {
+            aminoType: 'claim/MsgClaimArkeo',
             toAmino: ({
                 creator
             }: codecs.arkeo.claim.MsgClaimArkeo): AminoMsgClaimArkeo['value'] => ({
@@ -313,8 +313,8 @@ export function createAminoConverters(): AminoConverters {
                 creator: fromBech32(creator).data
             }),
         },
-        '/arkeo.arkeo.MsgTransferClaim': {
-            aminoType: 'arkeo/claim/MsgTransferClaim',
+        '/arkeo.claim.MsgTransferClaim': {
+            aminoType: 'claim/MsgTransferClaim',
             toAmino: ({
                 creator,
                 toAddress,
@@ -330,8 +330,8 @@ export function createAminoConverters(): AminoConverters {
                 toAddress: fromBech32(to_address).data,
             }),
         },
-        '/arkeo.arkeo.MsgAddClaim': {
-            aminoType: 'arkeo/claim/MsgAddClaim',
+        '/arkeo.claim.MsgAddClaim': {
+            aminoType: 'claim/MsgAddClaim',
             toAmino: ({
                 creator,
                 chain,
