@@ -48,7 +48,7 @@ export interface AminoMsgOpenContract extends AminoMsg {
     readonly delegate: string
     readonly contract_type: ContractType
     readonly duration: number
-    readonly rate: cosmos.Coin
+    readonly rate: cosmos.Coin | undefined
     readonly deposit: string
     readonly settlement_duration: number
     readonly authorization: ContractAuthorization
@@ -209,7 +209,7 @@ export function createAminoConverters(): AminoConverters {
         delegate: toBech32('arkeo', delegate),
         contract_type: contractType,
         duration: duration,
-        rate: rate ?? { amount: '0', denom: 'uarkeo' },
+        rate: rate,
         deposit: deposit,
         settlement_duration: settlementDuration,
         authorization: authorization,
