@@ -4,9 +4,7 @@ import { AminoConverters } from '@cosmjs/stargate'
 
 import * as codecs from '../../proto'
 import * as cosmos from '../../proto/generated/cosmos/base/v1beta1/coin'
-import {
-  arkeo
-} from '../../proto'
+import { arkeo } from '../../proto'
 import Long from 'long'
 
 export interface AminoMsgBondProvider extends AminoMsg {
