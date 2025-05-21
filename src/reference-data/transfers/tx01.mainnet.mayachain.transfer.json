@@ -1,0 +1,27 @@
+{
+  "signerAddress": "maya1ls33ayg26kmltw7jjy55p32ghjna09zp7z4etj",
+  "account_number": "10409",
+  "chain_id": "mayachain-mainnet-v1",
+  "sequence": "3",
+  "fee": {
+    "amount": [],
+    "gas": "2000000"
+  },
+  "memo": "",
+  "msg": [
+    {
+      "type": "thorchain/MsgSend",
+      "value": {
+        "amount": [
+          {
+            "amount": "1",
+            "denom": "cacao"
+          }
+        ],
+        "from_address": "maya1ls33ayg26kmltw7jjy55p32ghjna09zp7z4etj",
+        "to_address": "maya1ls33ayg26kmltw7jjy55p32ghjna09zp7z4etj"
+      }
+    }
+  ],
+  "signatures": []
+}

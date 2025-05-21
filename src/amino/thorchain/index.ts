@@ -24,16 +24,16 @@ export interface AminoMsgDeposit extends AminoMsg {
   }
 }
 
-export function createAminoConverters(): AminoConverters {
+export function createAminoConverters(prefix: string): AminoConverters {
   return {
     '/types.MsgSend': {
       aminoType: 'thorchain/MsgSend',
-      toAmino: ({ fromAddress, toAddress, amount }: codecs.thorchain_types.MsgSend): AminoMsgSend['value'] => ({
-        from_address: toBech32('thor', fromAddress),
-        to_address: toBech32('thor', toAddress),
+      toAmino: ({ fromAddress, toAddress, amount }: codecs.thorchain.MsgSend): AminoMsgSend['value'] => ({
+        from_address: toBech32(prefix, fromAddress),
+        to_address: toBech32(prefix, toAddress),
         amount: [...amount],
       }),
-      fromAmino: ({ from_address, to_address, amount }: AminoMsgSend['value']): codecs.thorchain_types.MsgSend => ({
+      fromAmino: ({ from_address, to_address, amount }: AminoMsgSend['value']): codecs.thorchain.MsgSend => ({
         fromAddress: fromBech32(from_address).data,
         toAddress: fromBech32(to_address).data,
         amount: [...amount],
@@ -41,12 +41,12 @@ export function createAminoConverters(): AminoConverters {
     },
     '/types.MsgDeposit': {
       aminoType: 'thorchain/MsgDeposit',
-      toAmino: ({ coins, memo, signer }: codecs.thorchain_types.MsgDeposit): AminoMsgDeposit['value'] => ({
+      toAmino: ({ coins, memo, signer }: codecs.thorchain.MsgDeposit): AminoMsgDeposit['value'] => ({
         coins: [...coins],
         memo: memo,
-        signer: toBech32('thor', signer),
+        signer: toBech32(prefix, signer),
       }),
-      fromAmino: ({ coins, memo, signer }: AminoMsgDeposit['value']): codecs.thorchain_types.MsgDeposit => ({
+      fromAmino: ({ coins, memo, signer }: AminoMsgDeposit['value']): codecs.thorchain.MsgDeposit => ({
         coins: [...coins],
         memo: memo,
         signer: fromBech32(signer).data,

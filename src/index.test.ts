@@ -11,13 +11,11 @@ const prefixes = {
   cosmos: 'cosmos',
   thorchain: 'thor',
   arkeo: 'arkeo',
-  // terra: 'terra',
-  // kava: 'kava',
-  // secret: 'secret'
+  mayachain: 'maya',
 } as const
 
 // TODO - combine this with prefixes as a chain config object
-const coinTypes: Record<string, number> = { arkeo: 118, cosmos: 118, osmosis: 118, thorchain: 931 }
+const coinTypes: Record<string, number> = { arkeo: 118, cosmos: 118, osmosis: 118, thorchain: 931, mayachain: 931 }
 const defaultCoinType = coinTypes.cosmos
 
 // TODO - options argument with acceess to full path, or change prefixes to a general config obj per chain
@@ -38,8 +36,6 @@ async function makeReferenceSeedSigner(prefix: string, coinType?: number) {
       prefix,
     }
   )
-  const accts = await w.getAccounts()
-  console.log(`address: ${accts[0].address}`)
   return w
 }
 

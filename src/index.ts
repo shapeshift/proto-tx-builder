@@ -70,7 +70,7 @@ export async function sign(
     ...createIbcAminoConverters(),
     ...createStakingAminoConverters(prefix),
     ...createVestingAminoConverters(),
-    ...thorchain.createAminoConverters(),
+    ...thorchain.createAminoConverters(prefix),
     ...osmosis.createAminoConverters(),
     ...arkeo.createAminoConverters(),
   })
@@ -117,9 +117,9 @@ export async function sign(
   myRegistry.register('/osmosis.lockup.MsgBeginUnlocking', codecs.osmosis.lockup.MsgBeginUnlocking)
   myRegistry.register('/osmosis.lockup.MsgBeginUnlockingAll', codecs.osmosis.lockup.MsgBeginUnlockingAll)
 
-  // thorchain
-  myRegistry.register('/types.MsgSend', codecs.thorchain_types.MsgSend)
-  myRegistry.register('/types.MsgDeposit', codecs.thorchain_types.MsgDeposit)
+  // thorchain/mayachain
+  myRegistry.register('/types.MsgSend', codecs.thorchain.MsgSend)
+  myRegistry.register('/types.MsgDeposit', codecs.thorchain.MsgDeposit)
 
   const clientOffline = await SigningStargateClient.offline(signer, { registry: myRegistry, aminoTypes: myAminoTypes })
 
@@ -129,7 +129,7 @@ export async function sign(
     if (isProtoTx(tx)) {
       return tx
     } else {
-      return parse_legacy_tx_format(tx)
+      return parse_legacy_tx_format(tx, prefix)
     }
   })()
 
@@ -172,14 +172,14 @@ const scrubRoute = (x: Route) => {
 
 const scrubRoutes = (x: Route[]) => x.map(scrubRoute)
 
-function parse_legacy_tx_format(tx: AgnosticStdTx): ProtoTx {
+function parse_legacy_tx_format(tx: AgnosticStdTx, prefix: string): ProtoTx {
   const msgOrMsgs = tx.msg ?? tx.msgs
   if (!msgOrMsgs) throw new Error('msgs array improperly formatted!')
 
   if (msgOrMsgs.length !== 1) throw new Error('multiple msgs not supported!')
 
   return {
-    ...convertLegacyMsg(msgOrMsgs[0]),
+    ...convertLegacyMsg(msgOrMsgs[0], prefix),
     fee: {
       amount: scrubCoins(tx.fee.amount),
       gas: tx.fee.gas,
@@ -189,7 +189,7 @@ function parse_legacy_tx_format(tx: AgnosticStdTx): ProtoTx {
   }
 }
 
-function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
+function convertLegacyMsg(msg: amino.AminoMsg, prefix: string): Pick<ProtoTx, 'msg'> {
   // switch for each tx type supported
   switch (msg.type) {
     case 'thorchain/MsgSend':
@@ -224,7 +224,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         ;[chain, symbol] = parts
       } else {
         ;[symbol] = parts
-        chain = 'THOR'
+        chain = prefix.toUpperCase()
       }
 
       const [ticker] = symbol.split('-')
