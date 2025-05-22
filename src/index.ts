@@ -19,7 +19,7 @@ import { toAccAddress } from '@cosmjs/stargate/build/queryclient/utils'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 import BN from 'bn.js'
-import { arkeo, osmosis, thorchain } from './amino'
+import { arkeo, osmosis, thorchain, mayachain } from './amino'
 import * as codecs from './proto'
 
 type AgnosticStdTx = Omit<amino.StdTx, 'msg'> &
@@ -54,7 +54,7 @@ export async function sign(
   tx: amino.StdTx | ProtoTx,
   signer: OfflineSigner,
   { accountNumber, sequence, chainId }: SignerData,
-  prefix = 'cosmos' // should ideally come from signer, but not exposed by cosmjs at this time
+  prefix: string,
 ): Promise<{
   serialized: string
   body: string
@@ -70,7 +70,8 @@ export async function sign(
     ...createIbcAminoConverters(),
     ...createStakingAminoConverters(prefix),
     ...createVestingAminoConverters(),
-    ...thorchain.createAminoConverters(prefix),
+    ...(prefix === 'thor' && thorchain.createAminoConverters()),
+    ...(prefix === 'maya' && mayachain.createAminoConverters()),
     ...osmosis.createAminoConverters(),
     ...arkeo.createAminoConverters(),
   })
@@ -129,7 +130,7 @@ export async function sign(
     if (isProtoTx(tx)) {
       return tx
     } else {
-      return parse_legacy_tx_format(tx, prefix)
+      return parse_legacy_tx_format(tx)
     }
   })()
 
@@ -172,14 +173,14 @@ const scrubRoute = (x: Route) => {
 
 const scrubRoutes = (x: Route[]) => x.map(scrubRoute)
 
-function parse_legacy_tx_format(tx: AgnosticStdTx, prefix: string): ProtoTx {
+function parse_legacy_tx_format(tx: AgnosticStdTx): ProtoTx {
   const msgOrMsgs = tx.msg ?? tx.msgs
   if (!msgOrMsgs) throw new Error('msgs array improperly formatted!')
 
   if (msgOrMsgs.length !== 1) throw new Error('multiple msgs not supported!')
 
   return {
-    ...convertLegacyMsg(msgOrMsgs[0], prefix),
+    ...convertLegacyMsg(msgOrMsgs[0]),
     fee: {
       amount: scrubCoins(tx.fee.amount),
       gas: tx.fee.gas,
@@ -189,10 +190,11 @@ function parse_legacy_tx_format(tx: AgnosticStdTx, prefix: string): ProtoTx {
   }
 }
 
-function convertLegacyMsg(msg: amino.AminoMsg, prefix: string): Pick<ProtoTx, 'msg'> {
+function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
   // switch for each tx type supported
   switch (msg.type) {
     case 'thorchain/MsgSend':
+    case 'mayachain/MsgSend':
       if (!msg.value.hasOwnProperty('from_address')) throw new Error('Missing from_address in msg')
       if (!msg.value.hasOwnProperty('to_address')) throw new Error('Missing to_address in msg')
 
@@ -209,6 +211,7 @@ function convertLegacyMsg(msg: amino.AminoMsg, prefix: string): Pick<ProtoTx, 'm
         ],
       }
     case 'thorchain/MsgDeposit':
+    case 'mayachain/MsgDeposit':
       if (msg.value.coins?.length !== 1) {
         throw new Error(`expected 1 input coin got ${msg.value.coins?.length}`)
       }
@@ -224,7 +227,16 @@ function convertLegacyMsg(msg: amino.AminoMsg, prefix: string): Pick<ProtoTx, 'm
         ;[chain, symbol] = parts
       } else {
         ;[symbol] = parts
-        chain = prefix.toUpperCase()
+        chain = (() => {
+          switch (msg.type) {
+            case 'thorchain/MsgDeposit':
+              return 'THOR'
+            case 'mayachain/MsgDeposit':
+              return 'MAYA'
+            default:
+              throw new Error(`unsupported message type: ${msg.type}`)
+          }
+        })()
       }
 
       const [ticker] = symbol.split('-')
