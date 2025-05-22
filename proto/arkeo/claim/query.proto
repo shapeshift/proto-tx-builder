@@ -4,7 +4,6 @@ package arkeo.claim;
 
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
 import "arkeo/claim/params.proto";
 import "arkeo/claim/claim_record.proto";
 

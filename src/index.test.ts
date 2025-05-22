@@ -11,13 +11,11 @@ const prefixes = {
   cosmos: 'cosmos',
   thorchain: 'thor',
   arkeo: 'arkeo',
-  // terra: 'terra',
-  // kava: 'kava',
-  // secret: 'secret'
+  mayachain: 'maya',
 } as const
 
 // TODO - combine this with prefixes as a chain config object
-const coinTypes: Record<string, number> = { arkeo: 118, cosmos: 118, osmosis: 118, thorchain: 931 }
+const coinTypes: Record<string, number> = { arkeo: 118, cosmos: 118, osmosis: 118, thorchain: 931, mayachain: 931 }
 const defaultCoinType = coinTypes.cosmos
 
 // TODO - options argument with acceess to full path, or change prefixes to a general config obj per chain
@@ -38,8 +36,6 @@ async function makeReferenceSeedSigner(prefix: string, coinType?: number) {
       prefix,
     }
   )
-  const accts = await w.getAccounts()
-  console.log(`address: ${accts[0].address}`)
   return w
 }
 
@@ -57,7 +53,10 @@ describe('signs Tendermint transactions', () => {
     const [, txNum, txNet, txAsset, txType] = signedJsonPathSegments
     it(`signs a ${txNet} ${txAsset} reference ${txType.replace(/[.-]/, ' ')} transaction (${txNum})`, async () => {
       if (!(txAsset in signers)) throw new Error(`unrecognized asset type '${txAsset}'`)
+      if (!(txAsset in prefixes)) throw new Error(`unrecognized asset type '${txAsset}'`)
+
       const signer = await signers[txAsset as keyof typeof signers]
+      const prefix = prefixes[txAsset as keyof typeof prefixes]
 
       // get reference data
       const referenceTx = JSON.parse(
@@ -74,7 +73,7 @@ describe('signs Tendermint transactions', () => {
         sequence: referenceTx.sequence,
         accountNumber: referenceTx.account_number,
         chainId: referenceTx.chain_id,
-      })
+      }, prefix)
 
       expect(result.serialized).toBe(referenceTxSigned.serialized)
       expect(result.signatures[0]).toBe(referenceTxSigned.signatures[0])

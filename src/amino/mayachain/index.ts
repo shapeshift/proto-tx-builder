@@ -7,7 +7,7 @@ import * as cosmos from '../../proto/generated/cosmos/base/v1beta1/coin'
 import * as thorchain from '../../proto/generated/thorchain/v1/common/common'
 
 export interface AminoMsgSend extends AminoMsg {
-  readonly type: 'thorchain/MsgSend'
+  readonly type: 'mayachain/MsgSend'
   readonly value: {
     readonly from_address: string
     readonly to_address: string
@@ -16,7 +16,7 @@ export interface AminoMsgSend extends AminoMsg {
 }
 
 export interface AminoMsgDeposit extends AminoMsg {
-  readonly type: 'thorchain/MsgDeposit'
+  readonly type: 'mayachain/MsgDeposit'
   readonly value: {
     readonly coins: readonly thorchain.Coin[]
     readonly memo: string
@@ -27,10 +27,10 @@ export interface AminoMsgDeposit extends AminoMsg {
 export function createAminoConverters(): AminoConverters {
   return {
     '/types.MsgSend': {
-      aminoType: 'thorchain/MsgSend',
+      aminoType: 'mayachain/MsgSend',
       toAmino: ({ fromAddress, toAddress, amount }: codecs.thorchain.MsgSend): AminoMsgSend['value'] => ({
-        from_address: toBech32('thor', fromAddress),
-        to_address: toBech32('thor', toAddress),
+        from_address: toBech32('maya', fromAddress),
+        to_address: toBech32('maya', toAddress),
         amount: [...amount],
       }),
       fromAmino: ({ from_address, to_address, amount }: AminoMsgSend['value']): codecs.thorchain.MsgSend => ({
@@ -40,11 +40,11 @@ export function createAminoConverters(): AminoConverters {
       }),
     },
     '/types.MsgDeposit': {
-      aminoType: 'thorchain/MsgDeposit',
+      aminoType: 'mayachain/MsgDeposit',
       toAmino: ({ coins, memo, signer }: codecs.thorchain.MsgDeposit): AminoMsgDeposit['value'] => ({
         coins: [...coins],
         memo: memo,
-        signer: toBech32('thor', signer),
+        signer: toBech32('maya', signer),
       }),
       fromAmino: ({ coins, memo, signer }: AminoMsgDeposit['value']): codecs.thorchain.MsgDeposit => ({
         coins: [...coins],

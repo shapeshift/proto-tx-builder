@@ -19,7 +19,7 @@ import { toAccAddress } from '@cosmjs/stargate/build/queryclient/utils'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 import BN from 'bn.js'
-import { arkeo, osmosis, thorchain } from './amino'
+import { arkeo, osmosis, thorchain, mayachain } from './amino'
 import * as codecs from './proto'
 
 type AgnosticStdTx = Omit<amino.StdTx, 'msg'> &
@@ -54,7 +54,7 @@ export async function sign(
   tx: amino.StdTx | ProtoTx,
   signer: OfflineSigner,
   { accountNumber, sequence, chainId }: SignerData,
-  prefix = 'cosmos' // should ideally come from signer, but not exposed by cosmjs at this time
+  prefix: string,
 ): Promise<{
   serialized: string
   body: string
@@ -70,7 +70,8 @@ export async function sign(
     ...createIbcAminoConverters(),
     ...createStakingAminoConverters(prefix),
     ...createVestingAminoConverters(),
-    ...thorchain.createAminoConverters(),
+    ...(prefix === 'thor' && thorchain.createAminoConverters()),
+    ...(prefix === 'maya' && mayachain.createAminoConverters()),
     ...osmosis.createAminoConverters(),
     ...arkeo.createAminoConverters(),
   })
@@ -117,9 +118,9 @@ export async function sign(
   myRegistry.register('/osmosis.lockup.MsgBeginUnlocking', codecs.osmosis.lockup.MsgBeginUnlocking)
   myRegistry.register('/osmosis.lockup.MsgBeginUnlockingAll', codecs.osmosis.lockup.MsgBeginUnlockingAll)
 
-  // thorchain
-  myRegistry.register('/types.MsgSend', codecs.thorchain_types.MsgSend)
-  myRegistry.register('/types.MsgDeposit', codecs.thorchain_types.MsgDeposit)
+  // thorchain/mayachain
+  myRegistry.register('/types.MsgSend', codecs.thorchain.MsgSend)
+  myRegistry.register('/types.MsgDeposit', codecs.thorchain.MsgDeposit)
 
   const clientOffline = await SigningStargateClient.offline(signer, { registry: myRegistry, aminoTypes: myAminoTypes })
 
@@ -193,6 +194,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
   // switch for each tx type supported
   switch (msg.type) {
     case 'thorchain/MsgSend':
+    case 'mayachain/MsgSend':
       if (!msg.value.hasOwnProperty('from_address')) throw new Error('Missing from_address in msg')
       if (!msg.value.hasOwnProperty('to_address')) throw new Error('Missing to_address in msg')
 
@@ -209,6 +211,7 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         ],
       }
     case 'thorchain/MsgDeposit':
+    case 'mayachain/MsgDeposit':
       if (msg.value.coins?.length !== 1) {
         throw new Error(`expected 1 input coin got ${msg.value.coins?.length}`)
       }
@@ -224,7 +227,16 @@ function convertLegacyMsg(msg: amino.AminoMsg): Pick<ProtoTx, 'msg'> {
         ;[chain, symbol] = parts
       } else {
         ;[symbol] = parts
-        chain = 'THOR'
+        chain = (() => {
+          switch (msg.type) {
+            case 'thorchain/MsgDeposit':
+              return 'THOR'
+            case 'mayachain/MsgDeposit':
+              return 'MAYA'
+            default:
+              throw new Error(`unsupported message type: ${msg.type}`)
+          }
+        })()
       }
 
       const [ticker] = symbol.split('-')
