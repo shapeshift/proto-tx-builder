@@ -42,4 +42,4 @@ cosmos-sdk uses [protocol buffers](https://developers.google.com/protocol-buffer
 
 ## Contributing
 
-Please see the [Contributing Guidelines](CONTRIBUTING.md) document for this repo's specific contributing guidelines.
+Please see the [Contributing Guidelines](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/setting-guidelines-for-repository-contributors) document for this repo's specific contributing guidelines.
